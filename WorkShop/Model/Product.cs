@@ -36,5 +36,9 @@ namespace WorkShop.Model
 
         [Column("updated", TypeName = "timestamp")]
         public DateTime Updated { get; set; }
+
+        [Required]
+        [Column("active")]
+        public int Active { get; set; }
     }
 }

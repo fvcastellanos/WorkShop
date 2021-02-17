@@ -47,6 +47,10 @@ namespace WorkShop.Model
                 .Property(p => p.MinimalAmount)
                 .HasDefaultValue(0);
 
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Active)
+                .HasDefaultValue(1);
+
             // Discount Type
             modelBuilder.Entity<DiscountType>()
                 .HasIndex(p => p.Created)
@@ -64,6 +68,10 @@ namespace WorkShop.Model
                 .HasIndex(p => p.Updated)
                 .HasName("idx_discount_type_updated");
 
+            modelBuilder.Entity<DiscountType>()
+                .Property(p => p.Active)
+                .HasDefaultValue(1);
+
             // Operation Type
             modelBuilder.Entity<OperationType>()
                 .HasIndex(p => p.Created)
@@ -80,6 +88,10 @@ namespace WorkShop.Model
             modelBuilder.Entity<OperationType>()
                 .HasIndex(p => p.Updated)
                 .HasName("idx_operation_type_updated");
+
+            modelBuilder.Entity<OperationType>()
+                .Property(p => p.Active)
+                .HasDefaultValue(1);
 
             // Provider
             modelBuilder.Entity<Provider>()
@@ -106,6 +118,10 @@ namespace WorkShop.Model
             modelBuilder.Entity<Provider>()
                 .HasIndex(p => p.Updated)
                 .HasName("idx_provider_updated");
+
+            modelBuilder.Entity<Provider>()
+                .Property(p => p.Active)
+                .HasDefaultValue(1);
 
             // Provider Invoice
             modelBuilder.Entity<ProviderInvoice>()

@@ -13,6 +13,7 @@ using Steeltoe.Connector.MySql.EFCore;
 using Steeltoe.Management.Endpoint;
 using WorkShop.Data;
 using WorkShop.Model;
+using WorkShop.Services;
 
 namespace WorkShop
 {
@@ -35,6 +36,8 @@ namespace WorkShop
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+
+            services.AddScoped<ProductService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
