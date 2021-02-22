@@ -19,14 +19,13 @@ namespace WorkShop.Services
             _dbContext = dbContext;
         }
 
-        public Either<string, IEnumerable<ProductView>> GetProducts(int top = 10, int days = 30)
+        public Either<string, IEnumerable<ProductView>> GetProducts(int top = 25, int active = 1)
         {
             try
             {
-                _logger.LogInformation("get top {0} products from last {1} days", top, days);
+                _logger.LogInformation("get top {0} products with active value {1}", top, active);
                 var queryResult = from product in _dbContext.Products
-                    where product.Created >= LastNDays(days)
-                        && product.Active == 1
+                    where product.Active == active
                     select new ProductView()
                     {
                         Id = product.Id,

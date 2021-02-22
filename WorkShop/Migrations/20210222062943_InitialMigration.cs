@@ -19,7 +19,8 @@ namespace WorkShop.Migrations
                     name = table.Column<string>(type: "varchar(150)", nullable: false),
                     description = table.Column<string>(type: "varchar(300)", nullable: true),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    active = table.Column<int>(nullable: false, defaultValue: 1)
                 },
                 constraints: table =>
                 {
@@ -35,7 +36,8 @@ namespace WorkShop.Migrations
                     name = table.Column<string>(type: "varchar(150)", nullable: false),
                     description = table.Column<string>(type: "varchar(300)", nullable: true),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    active = table.Column<int>(nullable: false, defaultValue: 1)
                 },
                 constraints: table =>
                 {
@@ -54,7 +56,8 @@ namespace WorkShop.Migrations
                     minimal_amount = table.Column<int>(nullable: false, defaultValue: 0),
                     sale_price = table.Column<double>(nullable: false),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    active = table.Column<int>(nullable: false, defaultValue: 1)
                 },
                 constraints: table =>
                 {
@@ -73,7 +76,8 @@ namespace WorkShop.Migrations
                     tax_id = table.Column<string>(type: "varchar(50)", nullable: true),
                     description = table.Column<string>(type: "varchar(300)", nullable: true),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    active = table.Column<int>(nullable: false, defaultValue: 1)
                 },
                 constraints: table =>
                 {

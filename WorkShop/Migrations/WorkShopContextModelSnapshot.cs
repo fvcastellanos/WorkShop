@@ -24,6 +24,12 @@ namespace WorkShop.Migrations
                         .HasColumnName("id")
                         .HasColumnType("varchar(50)");
 
+                    b.Property<int>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("active")
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("created")
@@ -129,6 +135,12 @@ namespace WorkShop.Migrations
                         .HasColumnName("id")
                         .HasColumnType("varchar(50)");
 
+                    b.Property<int>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("active")
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("created")
@@ -166,6 +178,12 @@ namespace WorkShop.Migrations
                     b.Property<string>("Id")
                         .HasColumnName("id")
                         .HasColumnType("varchar(50)");
+
+                    b.Property<int>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("active")
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -223,6 +241,12 @@ namespace WorkShop.Migrations
                     b.Property<string>("Id")
                         .HasColumnName("id")
                         .HasColumnType("varchar(50)");
+
+                    b.Property<int>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("active")
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<string>("Code")
                         .IsRequired()

@@ -7,7 +7,76 @@
         <div class="col-10">
             <h2>Products</h2>
 
+            <div class="top-separator">
+                <fieldset>
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="form-group">
+                                <label for="searchCode">Code</label>
+                                <input type="text" class="form-control" id="searchCode" placeholder="Code">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="searchName">Name</label>
+                                <input type="text" class="form-control" id="searchName" placeholder="Name">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="searchActive">Active</label>
+                                <select class="custom-select" id="searchActive" @bind="Active">
+                                    <option value="1">Y</option>
+                                    <option value="0">N</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="top">Rows</label>
+                                <select class="custom-select" id="top" @bind="TopRows">
+                                    <option value="10">10</option>
+                                    <option selected="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                    <option value="500">500</option>
+                                </select>
+                            </div>                            
+                        </div>
+                    </div>
+                    <input type="button" class="btn btn-primary" value="Search" @onclick="Search" />
+                </fieldset>
+            </div>
+
             <ErrorMessage Display="@DisplayErrorMessage" Message="@ErrorMessage" />
+            <div class="top-separator">
+                <table class="table table-striped">
+                    <thead>
+                        <th>-</th>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Sale Price</th>
+                        <th>Active</th>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Products)
+                        {
+                            @* var userUrl="sites-by-users/" + site.ClientAddress.Replace(".", "-"); *@
+                            
+                            <tr>
+                                <td>-</td>
+                                <td>@product.Code</td>
+                                <td>@product.Name</td>
+                                <td>@product.SalePrice</td>
+                                <td><ActiveField Value="@product.Active"/></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
         </div>
     </div>
