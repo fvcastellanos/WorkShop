@@ -8,47 +8,54 @@
             <h2>Products</h2>
 
             <div class="top-separator">
-                <fieldset>
-                    <div class="row">
-                        <div class="col-5">
-                            <div class="form-group">
-                                <label for="searchCode">Code</label>
-                                <input type="text" class="form-control" id="searchCode" placeholder="Code">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Search</h4>
+                        <fieldset>
+                            <div class="row">
+                                <div class="col-5">
+                                    <div class="form-group">
+                                        <label for="searchCode">Code</label>
+                                        <input type="text" class="form-control" id="searchCode" placeholder="Code" @bind="Code">
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label for="searchName">Name</label>
+                                        <input type="text" class="form-control" id="searchName" placeholder="Name" @bind="Name">
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="searchName">Name</label>
-                                <input type="text" class="form-control" id="searchName" placeholder="Name">
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="searchActive">Active</label>
-                                <select class="custom-select" id="searchActive" @bind="Active">
-                                    <option value="1">Y</option>
-                                    <option value="0">N</option>
-                                </select>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label for="searchActive">Active</label>
+                                        <select class="custom-select" id="searchActive" @bind="Active">
+                                            <option value="1">Y</option>
+                                            <option value="0">N</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label for="top">Rows</label>
+                                        <select class="custom-select" id="top" @bind="TopRows">
+                                            <option value="10">10</option>
+                                            <option selected="25">25</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                            <option value="500">500</option>
+                                        </select>
+                                    </div>                            
+                                </div>
                             </div>
-                        </div>
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="top">Rows</label>
-                                <select class="custom-select" id="top" @bind="TopRows">
-                                    <option value="10">10</option>
-                                    <option selected="25">25</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                    <option value="500">500</option>
-                                </select>
-                            </div>                            
-                        </div>
+                            <input type="button" class="btn btn-secondary" value="Search" @onclick="Search" />
+                            <input type="button" class="btn btn-primary" value="Add Product" @onclick="ShowAddModal" />
+                        </fieldset>
                     </div>
-                    <input type="button" class="btn btn-primary" value="Search" @onclick="Search" />
-                </fieldset>
+                </div>
+
             </div>
 
             <ErrorMessage Display="@DisplayErrorMessage" Message="@ErrorMessage" />
@@ -58,7 +65,7 @@
                         <th>-</th>
                         <th>Code</th>
                         <th>Name</th>
-                        <th>Sale Price</th>
+                        <th>Minimal Amount</th>
                         <th>Active</th>
                     </thead>
                     <tbody>
@@ -70,13 +77,56 @@
                                 <td>-</td>
                                 <td>@product.Code</td>
                                 <td>@product.Name</td>
-                                <td>@product.SalePrice</td>
+                                <td>@product.MinimalAmount</td>
                                 <td><ActiveField Value="@product.Active"/></td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
+
+            @if (DisplayAddModal)
+            {
+                <div class="modal" tabindex="-1" role="dialog" style="display: block">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Add Product</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddModal">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+
+                                <ErrorMessage Display="@HasModalError" Message="@ModalErrorMessage" />
+
+                                <EditForm Model="@ProductView" OnValidSubmit="@SaveChanges">
+                                    <DataAnnotationsValidator/>
+                                    <ValidationSummary/>
+                                    <div class="form-group">
+                                        <label for="name">Code</label>
+                                        <input type="text" class="form-control" id="code" placeholder="Code" @bind="ProductView.Code"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="name">Name</label>
+                                        <input type="text" class="form-control" id="name" placeholder="Name" @bind="ProductView.Name"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="description">Description</label>
+                                        <textarea class="form-control" id="description" @bind="ProductView.Description" row="4"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="minimalAmount">Minimal Amount</label>
+                                        <input type="number" class="form-control" id="minimalAmount" @bind="ProductView.MinimalAmount"/>
+                                    </div>                                        
+                                    <input type="submit" class="btn btn-primary" value="Save" @onclick="SaveChanges" />
+                                    <input type="button" class="btn btn-secondary" value="Cancel" @onclick="HideAddModal"/>
+                                </EditForm>
+                            </div>
+                        </div>
+                    </div>
+                </div>    
+            }
 
         </div>
     </div>
