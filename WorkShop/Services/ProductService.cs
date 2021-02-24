@@ -40,7 +40,7 @@ namespace WorkShop.Services
             }
         }
 
-        public Either<string, ProductView> AddProduct(ProductView productView)
+        public Either<string, ProductView> Add(ProductView productView)
         {
             try
             {
@@ -70,6 +70,35 @@ namespace WorkShop.Services
             {
                 _logger.LogError("can't create new product with name: {0} - {1}", productView.Name, ex.Message);
                 return $"Can't create product with name: {productView.Name}";
+            }
+        }
+
+        public Either<string, ProductView> Update(ProductView productView)
+        {
+            try
+            {
+                var product = _dbContext.Products.Find(productView.Id);
+
+                if (product == null)
+                {
+                    return $"Product with id: {productView.Id} not found";
+                }
+
+                product.Name = productView.Name;
+                product.Description = productView.Description;
+                product.Code = productView.Code;
+                product.MinimalAmount = productView.MinimalAmount;
+                product.Updated = DateTime.Now;
+
+                _dbContext.Products.Update(product);
+                _dbContext.SaveChanges();
+
+                return productView;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("can't update product with id: {0} - {1}", productView.Id, ex.Message);
+                return $"Can't update product with id: {productView.Id}";
             }
         }
 
@@ -106,6 +135,22 @@ namespace WorkShop.Services
                 Created = product.Created,
                 Updated = product.Updated,
                 Active = product.Active
+            };
+        }
+
+        private static Product ToProduct(ProductView productView)
+        {
+            return new Product()
+            {
+                Id = productView.Id,
+                Code = productView.Code,
+                Name = productView.Name,
+                Description = productView.Description,
+                MinimalAmount = productView.MinimalAmount,
+                SalePrice = productView.SalePrice,
+                Created = productView.Created,
+                Updated = productView.Updated,
+                Active = productView.Active
             };
         }
     }

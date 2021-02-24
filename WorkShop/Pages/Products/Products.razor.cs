@@ -43,28 +43,50 @@ namespace WorkShop.Pages
 
         protected void SaveChanges()
         {
+            if (ModifyModal)
+            {
+                UpdateProduct();
+                return;
+            }
 
             AddProduct();
         }
 
-        protected override void ShowAddModal()
+        protected void GetProduct(string code)
+        {
+            var result = ProductService.FindByCode(code);
+
+            result.Some(ShowEditModal)
+                .None(() => ShowErrorMessage($"Code {code} not found"));
+        }
+
+        protected void ShowEditModal()
         {
             HideModalError();
-            DisplayAddModal = true;
+            ShowModal();
+            ModifyModal = true;
+        }
+
+        protected void ShowAddModal()
+        {
+            HideModalError();
+            ShowModal();
+            ModifyModal = false;
             ProductView = new ProductView();
         }
 
-        protected override void HideAddModal()
+        protected void HideAddModal()
         {
             HideModalError();
-            DisplayAddModal = false;
+            HideModal();
         }
+
 
         // ------------------------------------------------------------------------------------------
 
         private void AddProduct()
         {
-            var result = ProductService.AddProduct(ProductView);
+            var result = ProductService.Add(ProductView);
 
             result.Match(right => 
             {
@@ -74,6 +96,25 @@ namespace WorkShop.Pages
 
             }, DisplayModalError);
 
+        }
+
+        private void UpdateProduct()
+        {
+            var result = ProductService.Update(ProductView);
+
+            result.Match(right => {
+
+                HideModal();
+                HideModalError();
+                GetProducts();
+
+            }, DisplayModalError);
+        }
+
+        private void ShowEditModal(ProductView productView)
+        {
+            ProductView = productView;
+            ShowEditModal();
         }
     }
 }

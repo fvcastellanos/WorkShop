@@ -2,16 +2,12 @@ namespace WorkShop.Pages
 {
     public abstract class CrudBase: PageBase
     {
-        protected bool DisplayAddModal;
-        protected bool DisplayEditModal;
+        protected bool DisplayModal;
         protected bool DisplayDeleteModal;
         protected bool DisplayViewModal;
+        protected bool ModifyModal;
         protected bool HasModalError;
         protected string ModalErrorMessage;
-
-        protected abstract void ShowAddModal();
-
-        protected abstract void HideAddModal();
 
         protected void DisplayModalError(string error)
         {
@@ -23,6 +19,16 @@ namespace WorkShop.Pages
         {
             HasModalError = false;
             ModalErrorMessage = "";
+        }
+
+        protected void ShowModal()
+        {
+            DisplayModal = true;
+        }
+
+        protected void HideModal()
+        {
+            DisplayModal = false;
         }
     }
 }
