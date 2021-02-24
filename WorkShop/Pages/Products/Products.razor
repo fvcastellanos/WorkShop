@@ -62,7 +62,7 @@
             <div class="top-separator">
                 <table class="table table-striped">
                     <thead>
-                        <th>-</th>
+                        <th>#</th>
                         <th>Code</th>
                         <th>Name</th>
                         <th>Minimal Amount</th>
@@ -71,11 +71,9 @@
                     <tbody>
                         @foreach (var product in Products)
                         {
-                            @* var userUrl="sites-by-users/" + site.ClientAddress.Replace(".", "-"); *@
-                            
                             <tr>
                                 <td>
-                                    <button class="btn btn-primary" @onclick="() => GetProduct(product.Code)" >
+                                    <button class="btn btn-secondary" @onclick="() => GetProduct(product.Code)" >
                                         <span class="oi oi-brush" aria-hidden="true"></span>
                                     </button>                                    
                                 </td>
@@ -126,12 +124,13 @@
                                     @if (ModifyModal)
                                     {
                                         <div class="form-group">
-                                            <InputSelect @bind-Value="ProductView.Active" class="form-control" id="active">
+                                            <select class="form-control" @bind="ProductView.Active">
                                                 <option value="0">N</option>
                                                 <option value="1">Y</option>
-                                            </InputSelect>
+                                            </select>
                                         </div>
                                     }
+
                                     <input type="submit" class="btn btn-primary" value="Save" @onclick="SaveChanges" />
                                     <input type="button" class="btn btn-secondary" value="Cancel" @onclick="HideAddModal"/>
                                 </EditForm>

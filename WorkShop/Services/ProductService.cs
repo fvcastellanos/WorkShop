@@ -88,6 +88,7 @@ namespace WorkShop.Services
                 product.Description = productView.Description;
                 product.Code = productView.Code;
                 product.MinimalAmount = productView.MinimalAmount;
+                product.Active = productView.Active;
                 product.Updated = DateTime.Now;
 
                 _dbContext.Products.Update(product);
