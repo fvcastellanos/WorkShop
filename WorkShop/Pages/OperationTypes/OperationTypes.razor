@@ -1,11 +1,12 @@
-@inherits ProductsBase
+@inherits OperationTypesBase
 
-@page "/products"
+@page "/operation-types"
 
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-10">
-            <h2>Products</h2>
+            <h2>Operation Types</h2>
+            <p>Operation types catalog</p>
 
             <div class="top-separator">
                 <div class="card">
@@ -51,7 +52,7 @@
                                 </div>
                             </div>
                             <input type="button" class="btn btn-secondary" value="Search" @onclick="Search" />
-                            <input type="button" class="btn btn-primary" value="Add Product" @onclick="ShowAddModal" />
+                            <input type="button" class="btn btn-primary" value="Add Operation Type" @onclick="ShowAddModal" />
                         </fieldset>
                     </div>
                 </div>
@@ -65,22 +66,22 @@
                         <th>#</th>
                         <th>Code</th>
                         <th>Name</th>
-                        <th>Minimal Amount</th>
+                        <th>Tax Id</th>
                         <th>Active</th>
                     </thead>
                     <tbody>
-                        @foreach (var product in Products)
+                        @foreach (var operationType in OperationTypes)
                         {
                             <tr>
                                 <td>
-                                    <button class="btn btn-secondary" @onclick="() => GetProduct(product.Code)" >
+                                    <button class="btn btn-secondary" @onclick="() => GetOperationType(operationType.Code)" >
                                         <span class="oi oi-brush" aria-hidden="true"></span>
                                     </button>                                    
                                 </td>
-                                <td>@product.Code</td>
-                                <td>@product.Name</td>
-                                <td>@product.MinimalAmount</td>
-                                <td><ActiveField Value="@product.Active"/></td>
+                                <td>@operationType.Code</td>
+                                <td>@operationType.Name</td>
+                                <td>@operationType.TaxId</td>
+                                <td><ActiveField Value="@operationType.Active"/></td>
                             </tr>
                         }
                     </tbody>
@@ -93,7 +94,7 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">Add Product</h5>
+                                <h5 class="modal-title">Add Operation Type</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddModal">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -106,25 +107,29 @@
                                     <DataAnnotationsValidator/>
                                     <ValidationSummary/>
                                     <div class="form-group">
-                                        <label for="name">Code</label>
-                                        <input type="text" class="form-control" id="code" placeholder="Code" @bind="ProductView.Code"/>
+                                        <label for="code">Code</label>
+                                        <input type="text" class="form-control" id="code" placeholder="Code" @bind="OperationTypeView.Code"/>
                                     </div>
                                     <div class="form-group">
                                         <label for="name">Name</label>
-                                        <input type="text" class="form-control" id="name" placeholder="Name" @bind="ProductView.Name"/>
+                                        <input type="text" class="form-control" id="name" placeholder="Name" @bind="OperationTypeView.Name"/>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="contact">Contact</label>
+                                        <input type="text" class="form-control" id="contact" placeholder="Name" @bind="OperationTypeView.Contact"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="taxId">Tax Id</label>
+                                        <input type="text" class="form-control" id="taxId" @bind="OperationTypeView.TaxId"/>
+                                    </div>                                        
                                     <div class="form-group">
                                         <label for="description">Description</label>
-                                        <textarea class="form-control" id="description" @bind="ProductView.Description" row="4"></textarea>
+                                        <textarea class="form-control" id="description" @bind="OperationTypeView.Description" row="4"></textarea>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="minimalAmount">Minimal Amount</label>
-                                        <input type="number" class="form-control" id="minimalAmount" @bind="ProductView.MinimalAmount"/>
-                                    </div>                                        
                                     @if (ModifyModal)
                                     {
                                         <div class="form-group">
-                                            <select class="form-control" @bind="ProductView.Active">
+                                            <select class="form-control" @bind="OperationTypeView.Active">
                                                 <option value="0">N</option>
                                                 <option value="1">Y</option>
                                             </select>

@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.Components.Forms;
+
 namespace WorkShop.Pages
 {
     public abstract class CrudBase: PageBase
     {
+        protected EditContext EditContext;
         protected bool DisplayModal;
         protected bool DisplayDeleteModal;
         protected bool DisplayViewModal;
@@ -29,6 +32,24 @@ namespace WorkShop.Pages
         protected void HideModal()
         {
             DisplayModal = false;
+        }
+
+        protected abstract void Update();
+        protected abstract void Add();
+
+        protected void SaveChanges()
+        {
+            if (!EditContext.Validate())
+            {
+                return;
+            }
+
+            if (ModifyModal)
+            {
+                Update();
+            }
+
+            Add();
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using WorkShop.Domain;
 using WorkShop.Services;
 
@@ -41,17 +42,6 @@ namespace WorkShop.Pages
             GetProducts();
         }
 
-        protected void SaveChanges()
-        {
-            if (ModifyModal)
-            {
-                UpdateProduct();
-                return;
-            }
-
-            AddProduct();
-        }
-
         protected void GetProduct(string code)
         {
             var result = ProductService.FindByCode(code);
@@ -73,6 +63,7 @@ namespace WorkShop.Pages
             ShowModal();
             ModifyModal = false;
             ProductView = new ProductView();
+            EditContext = new EditContext(ProductView);
         }
 
         protected void HideAddModal()
@@ -81,24 +72,7 @@ namespace WorkShop.Pages
             HideModal();
         }
 
-
-        // ------------------------------------------------------------------------------------------
-
-        private void AddProduct()
-        {
-            var result = ProductService.Add(ProductView);
-
-            result.Match(right => 
-            {
-                HideAddModal();
-                HideModalError();
-                GetProducts();
-
-            }, DisplayModalError);
-
-        }
-
-        private void UpdateProduct()
+        protected override void Update()
         {
             var result = ProductService.Update(ProductView);
 
@@ -110,6 +84,21 @@ namespace WorkShop.Pages
 
             }, DisplayModalError);
         }
+
+        protected override void Add()
+        {
+            var result = ProductService.Add(ProductView);
+
+            result.Match(right => 
+            {
+                HideAddModal();
+                HideModalError();
+                GetProducts();
+
+            }, DisplayModalError);
+        }
+
+        // ------------------------------------------------------------------------------------------
 
         private void ShowEditModal(ProductView productView)
         {
