@@ -1,11 +1,13 @@
 
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Components.Forms;
 using WorkShop.Domain;
 
 namespace WorkShop.Pages
 {
     public class OperationTypesBase : CrudBase
     {
+        // protected 
         protected OperationTypeView OperationTypeView;
         protected IEnumerable<OperationTypeView> OperationTypes = new List<OperationTypeView>();
         protected int TopRows;
@@ -21,22 +23,32 @@ namespace WorkShop.Pages
             Name = "";
 
             HideAddModal();
-            // GetProducts();
+            GetOperationTypes();
+        }
+
+        protected void GetOperationTypes()
+        {
+
         }
 
         protected void HideAddModal()
         {
-
+            HideModalError();
+            HideModal();
         }
 
         protected void ShowAddModal()
         {
-
+            HideModalError();
+            ShowModal();
+            ModifyModal = false;
+            OperationTypeView = new OperationTypeView();
+            EditContext = new EditContext(OperationTypeView);
         }
 
         protected void Search()
         {
-
+            
         }
 
         protected void GetOperationType(string code)
