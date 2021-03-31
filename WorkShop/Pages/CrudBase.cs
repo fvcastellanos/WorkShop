@@ -47,6 +47,8 @@ namespace WorkShop.Pages
             if (ModifyModal)
             {
                 Update();
+                
+                return;
             }
 
             Add();

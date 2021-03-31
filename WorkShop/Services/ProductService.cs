@@ -52,10 +52,8 @@ namespace WorkShop.Services
                     return $"Code {productView.Code} already exists";
                 }
 
-                var id = Guid.NewGuid().ToString();
                 var product = new Product()
                 {
-                        Id = id,
                         Code = productView.Code,
                         Name = productView.Name,
                         Description = productView.Description,
@@ -79,7 +77,8 @@ namespace WorkShop.Services
         {
             try
             {
-                var product = _dbContext.Products.Find(productView.Id);
+                var id = Guid.Parse(productView.Id);
+                var product = _dbContext.Products.Find(id);
 
                 if (product == null)
                 {
@@ -129,7 +128,7 @@ namespace WorkShop.Services
         {
             return new ProductView()
             {
-                Id = product.Id,
+                Id = product.Id.ToString(),
                 Code = product.Code,
                 Name = product.Name,
                 Description = product.Description,
@@ -145,7 +144,7 @@ namespace WorkShop.Services
         {
             return new Product()
             {
-                Id = productView.Id,
+                Id = Guid.Parse(productView.Id),
                 Code = productView.Code,
                 Name = productView.Name,
                 Description = productView.Description,

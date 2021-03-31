@@ -9,7 +9,7 @@ namespace WorkShop.Model
     {
         [Key]
         [Column("id", TypeName = "varchar(50)")]
-        public string Id { get; set; }
+        public Guid Id { get; set; }
 
         [ForeignKey("provider_id")]
         public Provider Provider { get; set; }

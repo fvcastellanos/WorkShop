@@ -51,9 +51,12 @@ namespace WorkShop.Pages
             EditContext = new EditContext(OperationTypeView);
         }
 
-        protected void GetOperationType(string code)
+        protected void GetOperationType(string id)
         {
+            var result = OperationTypeService.GetById(id);
 
+            result.Match(ShowEditModal, 
+                () => ShowErrorMessage($"Operation Type with id: {id} not found"));
         }
 
         protected override void Add()
@@ -71,7 +74,26 @@ namespace WorkShop.Pages
 
         protected override void Update()
         {
-            throw new System.NotImplementedException();
+            var result = OperationTypeService.Update(OperationTypeView);
+
+            result.Match(right => {
+                
+                HideModalError();
+                HideModal();
+                GetOperationTypes();
+
+            }, DisplayModalError);
+        }
+
+        // ----------------------------------------------------------------------------------------------------
+        private void ShowEditModal(OperationTypeView view)
+        {
+            OperationTypeView = view;
+            EditContext = new EditContext(OperationTypeView);
+
+            HideModalError();
+            ShowModal();
+            ModifyModal = true;
         }
     }
 }

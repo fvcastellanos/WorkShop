@@ -103,6 +103,8 @@ namespace WorkShop.Pages
         private void ShowEditModal(ProductView productView)
         {
             ProductView = productView;
+            EditContext = new EditContext(ProductView);
+
             ShowEditModal();
         }
     }

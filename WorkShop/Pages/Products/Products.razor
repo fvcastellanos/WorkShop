@@ -93,7 +93,14 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">Add Product</h5>
+                                @if (ModifyModal)
+                                {
+                                    <h5 class="modal-title">Update Product</h5>
+                                }
+                                else
+                                {
+                                    <h5 class="modal-title">Add Product</h5>
+                                }
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddModal">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -123,8 +130,8 @@
                                     </div>                                        
                                     @if (ModifyModal)
                                     {
-                                        <label for="active">Active</label>
-                                        <div id="active" class="form-group">
+                                        <label>Active</label>
+                                        <div class="form-group">
                                             <select class="form-control" @bind="ProductView.Active">
                                                 <option value="0">N</option>
                                                 <option value="1">Y</option>

@@ -22,6 +22,26 @@ namespace WorkShop.Services
             _dbContext = dbContext;
         }
 
+        public Option<OperationTypeView> GetById(string id)
+        {
+            try
+            {
+                _logger.LogInformation($"load operation type with id: {id}");
+
+                var key = Guid.Parse(id);
+
+                return _dbContext.OperationTypes
+                    .Where(ot => ot.Id.Equals(key))
+                    .Select(ToView)
+                    .FirstOrDefault();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"can't load operation type with id: {id} - ", exception);
+                return null;
+            }
+        }
+
         public Either<string, IEnumerable<OperationTypeView>> GetOperationTypes(int top = 25, string name = "", int active = 1)
         {
             try
@@ -53,13 +73,12 @@ namespace WorkShop.Services
                     return $"Operation Type with name: {view.Name} already exists";
                 }
 
-                var id = Guid.NewGuid().ToString();
                 var operationType = new OperationType()
                 {
-                    Id = id,
                     Name = view.Name,
                     Description = view.Description,
                     Active = view.Active,
+                    Inbound = view.Inbound,
                     Tenant = DefaultTenant
                 };
 
@@ -68,7 +87,7 @@ namespace WorkShop.Services
 
                 _logger.LogInformation($"Add new operation type with name: {view.Name}");
 
-                view.Id = operationType.Id;
+                view.Id = operationType.Id.ToString();
                 return view;
 
             }
@@ -76,6 +95,38 @@ namespace WorkShop.Services
             {
                 _logger.LogError($"can't add operation type: {view.Name} - ", exception.Message);
                 return $"Can't add operation type: {view.Name}";
+            }
+        }
+
+        public Either<string, OperationTypeView> Update(OperationTypeView view)
+        {
+            try
+            {
+                var id = Guid.Parse(view.Id);
+                var model = _dbContext.OperationTypes.Find(id);
+
+                if (model == null)
+                {
+                    return $"Operation Type: {view.Name} not found";
+                }
+
+                model.Name = view.Name;
+                model.Description = view.Description;
+                model.Inbound = view.Inbound;
+                model.Active = view.Active;
+                model.Updated = DateTime.Now;
+
+                _logger.LogInformation($"Update operation type: {view.Name}");
+
+                _dbContext.OperationTypes.Update(model);
+                _dbContext.SaveChanges();
+
+                return view;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"can't update operation type: {view.Name} - ", ex.Message);
+                return $"Can't update operation type: {view.Name}";
             }
         }
 
@@ -101,22 +152,12 @@ namespace WorkShop.Services
         {
             return new OperationTypeView()
             {
-                Id = operationType.Id,
+                Id = operationType.Id.ToString(),
                 Name = operationType.Name,
                 Description = operationType.Description,
-                Active = operationType.Active
+                Active = operationType.Active,
+                Inbound = operationType.Inbound
             };
         }
-
-        private OperationType ToModel(OperationTypeView view)
-        {
-            return new OperationType()
-            {
-                Name = view.Name,
-                Description = view.Description,
-                Active = view.Active
-            };
-        }
-
     }
 }
