@@ -11,7 +11,7 @@ namespace WorkShop.Pages
         [Inject]
         protected ProductService ProductService { get; set; }
 
-        protected IEnumerable<ProductView> Products;
+        protected IEnumerable<ProductView> Products = new List<ProductView>();
 
         protected ProductView ProductView;
         protected int TopRows;

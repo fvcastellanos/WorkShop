@@ -10,6 +10,7 @@ namespace WorkShop.Services
 {
     public class ProductService
     {
+        private const string DefaultTenant = "default";
         private readonly ILogger _logger;
         private readonly WorkShopContext _dbContext;
 
@@ -59,6 +60,7 @@ namespace WorkShop.Services
                         Name = productView.Name,
                         Description = productView.Description,
                         MinimalAmount = productView.MinimalAmount,
+                        Tenant = DefaultTenant
                 };
 
                 _dbContext.Products.Add(product);

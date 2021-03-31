@@ -28,5 +28,9 @@ namespace WorkShop.Model
         [Required]
         [Column("active")]
         public int Active { get; set; }
+
+        [Required]
+        [Column("tenant")]
+        public string Tenant { get; set; }
     }
 }
