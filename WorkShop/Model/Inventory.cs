@@ -44,5 +44,10 @@ namespace WorkShop.Model
 
         [Column("updated", TypeName = "timestamp")]
         public DateTime Updated { get; set; }
+
+        [Required]
+        [Column("tenant", TypeName = "varchar(50)")]
+        public string Tenant { get; set; }
+
     }
 }

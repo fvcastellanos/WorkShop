@@ -28,5 +28,9 @@ namespace WorkShop.Model
         [Required]
         [Column("active")]
         public int Active { get; set; }
+
+        [Required]
+        [Column("tenant", TypeName = "varchar(50)")]
+        public string Tenant { get; set; }
     }
 }

@@ -58,6 +58,7 @@
                     <thead>
                         <th>#</th>
                         <th>Name</th>
+                        <th>Inbound</th>
                         <th>Active</th>
                     </thead>
                     <tbody>
@@ -70,7 +71,8 @@
                                     </button>                                    
                                 </td>
                                 <td>@operationType.Name</td>
-                                <td><ActiveField Value="@operationType.Active"/></td>
+                                <td><BooleanField Value="@operationType.Inbound"/></td>
+                                <td><BooleanField Value="@operationType.Active"/></td>
                             </tr>
                         }
                     </tbody>
@@ -100,12 +102,20 @@
                                         <input type="text" class="form-control" id="name" placeholder="Name" @bind="OperationTypeView.Name"/>
                                     </div>
                                     <div class="form-group">
+                                        <label for="inbound">Inbound</label>
+                                        <select id="inbound" class="form-control" @bind="OperationTypeView.Inbound">
+                                            <option value="0">N</option>
+                                            <option value="1">Y</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
                                         <label for="description">Description</label>
                                         <textarea class="form-control" id="description" @bind="OperationTypeView.Description" row="4"></textarea>
                                     </div>
                                     @if (ModifyModal)
                                     {
-                                        <div class="form-group">
+                                        <label for="active">Active</label>
+                                        <div id="active" class="form-group">
                                             <select class="form-control" @bind="OperationTypeView.Active">
                                                 <option value="0">N</option>
                                                 <option value="1">Y</option>

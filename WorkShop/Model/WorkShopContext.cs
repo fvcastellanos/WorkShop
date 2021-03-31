@@ -51,6 +51,10 @@ namespace WorkShop.Model
                 .Property(p => p.Active)
                 .HasDefaultValue(1);
 
+            modelBuilder.Entity<Product>()
+                .HasIndex(p => p.Tenant)
+                .HasName("idx_product_tenant");
+
             // Discount Type
             modelBuilder.Entity<DiscountType>()
                 .HasIndex(p => p.Created)
@@ -72,6 +76,11 @@ namespace WorkShop.Model
                 .Property(p => p.Active)
                 .HasDefaultValue(1);
 
+            modelBuilder.Entity<DiscountType>()
+                .HasIndex(p => p.Tenant)
+                .HasName("idx_discount_type_tenant");
+
+
             // Operation Type
             modelBuilder.Entity<OperationType>()
                 .HasIndex(p => p.Created)
@@ -92,6 +101,18 @@ namespace WorkShop.Model
             modelBuilder.Entity<OperationType>()
                 .Property(p => p.Active)
                 .HasDefaultValue(1);
+
+            modelBuilder.Entity<OperationType>()
+                .HasIndex(p => p.Tenant)
+                .HasName("idx_operation_type_tenant");
+
+            modelBuilder.Entity<OperationType>()
+                .Property(p => p.Inbound)
+                .HasDefaultValueSql("0");
+            
+            modelBuilder.Entity<OperationType>()
+                .HasIndex(p => p.Inbound)
+                .HasName("idx_operation_type_inbound");
 
             // Provider
             modelBuilder.Entity<Provider>()
@@ -123,6 +144,10 @@ namespace WorkShop.Model
                 .Property(p => p.Active)
                 .HasDefaultValue(1);
 
+            modelBuilder.Entity<Provider>()
+                .HasIndex(p => p.Tenant)
+                .HasName("idx_provider_tenant");
+
             // Provider Invoice
             modelBuilder.Entity<ProviderInvoice>()
                 .HasIndex(p => new { p.Suffix, p.Number })
@@ -144,6 +169,10 @@ namespace WorkShop.Model
                 .HasIndex(p => p.Updated)
                 .HasName("idx_provider_invoice_updated");
 
+            modelBuilder.Entity<ProviderInvoice>()
+                .HasIndex(p => p.Tenant)
+                .HasName("idx_provider_invoice_tenant");
+
             // Inventory
             modelBuilder.Entity<Inventory>()
                 .Property(p => p.Amount)
@@ -164,6 +193,10 @@ namespace WorkShop.Model
             modelBuilder.Entity<Inventory>()
                 .HasIndex(p => p.Updated)
                 .HasName("idx_inventory_updated");
+
+            modelBuilder.Entity<Inventory>()
+                .HasIndex(p => p.Tenant)
+                .HasName("idx_inventory_tenant");
         }
     }
 }

@@ -41,7 +41,8 @@ namespace WorkShop.Model
         [Column("active")]
         public int Active { get; set; }
 
-        [Column("tenant")]
+        [Required]
+        [Column("tenant", TypeName = "varchar(50)")]
         public string Tenant { get; set; }
     }
 }

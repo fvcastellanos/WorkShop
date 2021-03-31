@@ -80,7 +80,7 @@
                                 <td>@product.Code</td>
                                 <td>@product.Name</td>
                                 <td>@product.MinimalAmount</td>
-                                <td><ActiveField Value="@product.Active"/></td>
+                                <td><BooleanField Value="@product.Active"/></td>
                             </tr>
                         }
                     </tbody>
@@ -123,7 +123,8 @@
                                     </div>                                        
                                     @if (ModifyModal)
                                     {
-                                        <div class="form-group">
+                                        <label for="active">Active</label>
+                                        <div id="active" class="form-group">
                                             <select class="form-control" @bind="ProductView.Active">
                                                 <option value="0">N</option>
                                                 <option value="1">Y</option>

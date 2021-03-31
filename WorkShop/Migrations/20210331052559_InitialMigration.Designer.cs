@@ -9,7 +9,7 @@ using WorkShop.Model;
 namespace WorkShop.Migrations
 {
     [DbContext(typeof(WorkShopContext))]
-    [Migration("20210222062943_InitialMigration")]
+    [Migration("20210331052559_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,6 +47,11 @@ namespace WorkShop.Migrations
                         .HasColumnName("name")
                         .HasColumnType("varchar(150)");
 
+                    b.Property<string>("Tenant")
+                        .IsRequired()
+                        .HasColumnName("tenant")
+                        .HasColumnType("varchar(50)");
+
                     b.Property<DateTime>("Updated")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("updated")
@@ -57,6 +62,9 @@ namespace WorkShop.Migrations
 
                     b.HasIndex("Created")
                         .HasName("idx_discount_type_created");
+
+                    b.HasIndex("Tenant")
+                        .HasName("idx_discount_type_tenant");
 
                     b.HasIndex("Updated")
                         .HasName("idx_discount_type_updated");
@@ -85,6 +93,11 @@ namespace WorkShop.Migrations
                     b.Property<double>("DiscountValue")
                         .HasColumnName("discount_value")
                         .HasColumnType("double");
+
+                    b.Property<string>("Tenant")
+                        .IsRequired()
+                        .HasColumnName("tenant")
+                        .HasColumnType("varchar(50)");
 
                     b.Property<double>("Total")
                         .HasColumnName("total")
@@ -116,6 +129,9 @@ namespace WorkShop.Migrations
 
                     b.HasIndex("Created")
                         .HasName("idx_inventory_created");
+
+                    b.HasIndex("Tenant")
+                        .HasName("idx_inventory_tenant");
 
                     b.HasIndex("Updated")
                         .HasName("idx_inventory_updated");
@@ -153,10 +169,21 @@ namespace WorkShop.Migrations
                         .HasColumnName("description")
                         .HasColumnType("varchar(300)");
 
+                    b.Property<int>("Inbound")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("inbound")
+                        .HasColumnType("int")
+                        .HasDefaultValueSql("0");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnName("name")
                         .HasColumnType("varchar(150)");
+
+                    b.Property<string>("Tenant")
+                        .IsRequired()
+                        .HasColumnName("tenant")
+                        .HasColumnType("varchar(50)");
 
                     b.Property<DateTime>("Updated")
                         .ValueGeneratedOnAdd()
@@ -168,6 +195,12 @@ namespace WorkShop.Migrations
 
                     b.HasIndex("Created")
                         .HasName("idx_operation_type_created");
+
+                    b.HasIndex("Inbound")
+                        .HasName("idx_operation_type_inbound");
+
+                    b.HasIndex("Tenant")
+                        .HasName("idx_operation_type_tenant");
 
                     b.HasIndex("Updated")
                         .HasName("idx_operation_type_updated");
@@ -217,6 +250,11 @@ namespace WorkShop.Migrations
                         .HasColumnName("sale_price")
                         .HasColumnType("double");
 
+                    b.Property<string>("Tenant")
+                        .IsRequired()
+                        .HasColumnName("tenant")
+                        .HasColumnType("varchar(50)");
+
                     b.Property<DateTime>("Updated")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("updated")
@@ -231,6 +269,9 @@ namespace WorkShop.Migrations
 
                     b.HasIndex("Created")
                         .HasName("idx_product_created");
+
+                    b.HasIndex("Tenant")
+                        .HasName("idx_product_tenant");
 
                     b.HasIndex("Updated")
                         .HasName("idx_product_updated");
@@ -278,6 +319,11 @@ namespace WorkShop.Migrations
                         .HasColumnName("tax_id")
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("Tenant")
+                        .IsRequired()
+                        .HasColumnName("tenant")
+                        .HasColumnType("varchar(50)");
+
                     b.Property<DateTime>("Updated")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("updated")
@@ -295,6 +341,9 @@ namespace WorkShop.Migrations
 
                     b.HasIndex("TaxId")
                         .HasName("idx_provider_tax_id");
+
+                    b.HasIndex("Tenant")
+                        .HasName("idx_provider_tenant");
 
                     b.HasIndex("Updated")
                         .HasName("idx_provider_updated");
@@ -328,6 +377,11 @@ namespace WorkShop.Migrations
                         .HasColumnName("suffix")
                         .HasColumnType("varchar(30)");
 
+                    b.Property<string>("Tenant")
+                        .IsRequired()
+                        .HasColumnName("tenant")
+                        .HasColumnType("varchar(50)");
+
                     b.Property<DateTime>("Updated")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("updated")
@@ -341,6 +395,9 @@ namespace WorkShop.Migrations
 
                     b.HasIndex("Created")
                         .HasName("idx_provider_invoice_created");
+
+                    b.HasIndex("Tenant")
+                        .HasName("idx_provider_invoice_tenant");
 
                     b.HasIndex("Updated")
                         .HasName("idx_provider_invoice_updated");

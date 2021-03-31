@@ -20,7 +20,8 @@ namespace WorkShop.Migrations
                     description = table.Column<string>(type: "varchar(300)", nullable: true),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    active = table.Column<int>(nullable: false, defaultValue: 1)
+                    active = table.Column<int>(nullable: false, defaultValue: 1),
+                    tenant = table.Column<string>(type: "varchar(50)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -35,9 +36,11 @@ namespace WorkShop.Migrations
                     id = table.Column<string>(type: "varchar(50)", nullable: false),
                     name = table.Column<string>(type: "varchar(150)", nullable: false),
                     description = table.Column<string>(type: "varchar(300)", nullable: true),
+                    inbound = table.Column<int>(nullable: false, defaultValueSql: "0"),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    active = table.Column<int>(nullable: false, defaultValue: 1)
+                    active = table.Column<int>(nullable: false, defaultValue: 1),
+                    tenant = table.Column<string>(type: "varchar(50)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -57,7 +60,8 @@ namespace WorkShop.Migrations
                     sale_price = table.Column<double>(nullable: false),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    active = table.Column<int>(nullable: false, defaultValue: 1)
+                    active = table.Column<int>(nullable: false, defaultValue: 1),
+                    tenant = table.Column<string>(type: "varchar(50)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -77,7 +81,8 @@ namespace WorkShop.Migrations
                     description = table.Column<string>(type: "varchar(300)", nullable: true),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    active = table.Column<int>(nullable: false, defaultValue: 1)
+                    active = table.Column<int>(nullable: false, defaultValue: 1),
+                    tenant = table.Column<string>(type: "varchar(50)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -95,7 +100,8 @@ namespace WorkShop.Migrations
                     number = table.Column<string>(type: "varchar(100)", nullable: false),
                     image_url = table.Column<string>(type: "varchar(250)", nullable: true),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    tenant = table.Column<string>(type: "varchar(50)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -124,7 +130,8 @@ namespace WorkShop.Migrations
                     discount_value = table.Column<double>(nullable: false),
                     total = table.Column<double>(nullable: false),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    tenant = table.Column<string>(type: "varchar(50)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -166,6 +173,12 @@ namespace WorkShop.Migrations
                 column: "created");
 
             migrationBuilder.CreateIndex(
+                name: "idx_discount_type_tenant",
+                schema: "workshop",
+                table: "discount_type",
+                column: "tenant");
+
+            migrationBuilder.CreateIndex(
                 name: "idx_discount_type_updated",
                 schema: "workshop",
                 table: "discount_type",
@@ -176,6 +189,12 @@ namespace WorkShop.Migrations
                 schema: "workshop",
                 table: "inventory",
                 column: "created");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_inventory_tenant",
+                schema: "workshop",
+                table: "inventory",
+                column: "tenant");
 
             migrationBuilder.CreateIndex(
                 name: "idx_inventory_updated",
@@ -214,6 +233,18 @@ namespace WorkShop.Migrations
                 column: "created");
 
             migrationBuilder.CreateIndex(
+                name: "idx_operation_type_inbound",
+                schema: "workshop",
+                table: "operation_type",
+                column: "inbound");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_operation_type_tenant",
+                schema: "workshop",
+                table: "operation_type",
+                column: "tenant");
+
+            migrationBuilder.CreateIndex(
                 name: "idx_operation_type_updated",
                 schema: "workshop",
                 table: "operation_type",
@@ -231,6 +262,12 @@ namespace WorkShop.Migrations
                 schema: "workshop",
                 table: "product",
                 column: "created");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_product_tenant",
+                schema: "workshop",
+                table: "product",
+                column: "tenant");
 
             migrationBuilder.CreateIndex(
                 name: "idx_product_updated",
@@ -258,6 +295,12 @@ namespace WorkShop.Migrations
                 column: "tax_id");
 
             migrationBuilder.CreateIndex(
+                name: "idx_provider_tenant",
+                schema: "workshop",
+                table: "provider",
+                column: "tenant");
+
+            migrationBuilder.CreateIndex(
                 name: "idx_provider_updated",
                 schema: "workshop",
                 table: "provider",
@@ -268,6 +311,12 @@ namespace WorkShop.Migrations
                 schema: "workshop",
                 table: "provider_invoice",
                 column: "created");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_provider_invoice_tenant",
+                schema: "workshop",
+                table: "provider_invoice",
+                column: "tenant");
 
             migrationBuilder.CreateIndex(
                 name: "idx_provider_invoice_updated",

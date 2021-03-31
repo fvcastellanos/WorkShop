@@ -18,6 +18,9 @@ namespace WorkShop.Model
         [Column("description", TypeName = "varchar(300)")]
         public string Description { get; set; }
 
+        [Column("inbound")]
+        public int Inbound { get; set; }
+
         [Required]
         [Column("created", TypeName = "timestamp")]
         public DateTime Created { get; set; }
@@ -30,7 +33,7 @@ namespace WorkShop.Model
         public int Active { get; set; }
 
         [Required]
-        [Column("tenant")]
+        [Column("tenant", TypeName = "varchar(50)")]
         public string Tenant { get; set; }
     }
 }
