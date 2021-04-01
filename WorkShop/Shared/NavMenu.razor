@@ -11,30 +11,22 @@
             Home
         </NavLink>          
       </li>
-      <li class="nav-item">
-        <NavLink class="nav-link" href="products">
-            Products
-        </NavLink>          
-      </li>
-      <li class="nav-item">
-        <NavLink class="nav-link" href="operation-types">
-            Operation Types
-        </NavLink>          
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">About</a>
-      </li>
       <li class="nav-item dropdown">
-        <NavLink class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dropdown</NavLink>
+        <NavLink class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Catalogs</NavLink>
         <div class="dropdown-menu">
           <NavLink class="dropdown-item" href="operation-types">Operation Types</NavLink>          
+          <NavLink class="dropdown-item" href="products">Products</NavLink>          
+          <NavLink class="dropdown-item" href="providers">Providers</NavLink>          
 
-          <a class="dropdown-item" href="#">Action</a>
+          @* <a class="dropdown-item" href="#">Action</a>
           <a class="dropdown-item" href="#">Another action</a>
           <a class="dropdown-item" href="#">Something else here</a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Separated link</a>
+          <a class="dropdown-item" href="#">Separated link</a> *@
         </div>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">About</a>
       </li>
     </ul>
     <form class="form-inline my-2 my-lg-0">
@@ -43,42 +35,3 @@
     </form>
   </div>
 </nav>
-
-
-@* <div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">WorkShop</a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-</div>
-
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </li>
-    </ul>
-</div>
-
-@code {
-    private bool collapseNavMenu = true;
-
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-} *@
