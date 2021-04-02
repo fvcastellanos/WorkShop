@@ -34,6 +34,19 @@ namespace WorkShop.Pages
             DisplayModal = false;
         }
 
+        protected void HideAddModal()
+        {
+            HideModalError();
+            HideModal();
+        }
+
+        protected void ShowEditModal()
+        {
+            HideModalError();
+            ShowModal();
+            ModifyModal = true;
+        }
+
         protected abstract void Update();
         protected abstract void Add();
 

@@ -36,12 +36,6 @@ namespace WorkShop.Pages
             result.Match(right => OperationTypes = right, ShowErrorMessage);            
         }
 
-        protected void HideAddModal()
-        {
-            HideModalError();
-            HideModal();
-        }
-
         protected void ShowAddModal()
         {
             HideModalError();
@@ -91,9 +85,7 @@ namespace WorkShop.Pages
             OperationTypeView = view;
             EditContext = new EditContext(OperationTypeView);
 
-            HideModalError();
-            ShowModal();
-            ModifyModal = true;
+            ShowEditModal();
         }
     }
 }

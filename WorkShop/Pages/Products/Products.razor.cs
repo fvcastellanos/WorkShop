@@ -50,13 +50,6 @@ namespace WorkShop.Pages
                 .None(() => ShowErrorMessage($"Code {code} not found"));
         }
 
-        protected void ShowEditModal()
-        {
-            HideModalError();
-            ShowModal();
-            ModifyModal = true;
-        }
-
         protected void ShowAddModal()
         {
             HideModalError();
@@ -64,12 +57,6 @@ namespace WorkShop.Pages
             ModifyModal = false;
             ProductView = new ProductView();
             EditContext = new EditContext(ProductView);
-        }
-
-        protected void HideAddModal()
-        {
-            HideModalError();
-            HideModal();
         }
 
         protected override void Update()

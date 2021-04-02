@@ -14,11 +14,13 @@
                         <h4 class="card-title">Search</h4>
                         <fieldset>
                             <div class="row">
-                                <div class="col">
+                                <div class="col-5">
                                     <div class="form-group">
                                         <label for="searchCode">Code</label>
-                                        <input type="text" class="form-control" id="searchCode" placeholder="Name" @bind="SearchView.Code">
+                                        <input type="text" class="form-control" id="searchCode" placeholder="Code" @bind="SearchView.Code">
                                     </div>
+                                </div>
+                                <div class="col">
                                     <div class="form-group">
                                         <label for="searchName">Name</label>
                                         <input type="text" class="form-control" id="searchName" placeholder="Name" @bind="SearchView.Name">
@@ -49,7 +51,7 @@
                                 </div>
                             </div>
                             <input type="button" class="btn btn-secondary" value="Search" @onclick="GetProviders" />
-                            <input type="button" class="btn btn-primary" value="Add Operation Type" @onclick="ShowAddModal" />
+                            <input type="button" class="btn btn-primary" value="Add Provider" @onclick="ShowAddModal" />
                         </fieldset>
                     </div>
                 </div>
@@ -71,7 +73,7 @@
                         {
                             <tr>
                                 <td>
-                                    <button class="btn btn-secondary" @onclick="() => GetProvider(provider.Id)" >
+                                    <button class="btn btn-secondary" @onclick="() => GetProvider(provider.Code)" >
                                         <span class="oi oi-brush" aria-hidden="true"></span>
                                     </button>                                    
                                 </td>
@@ -91,7 +93,14 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">Add Operation Type</h5>
+                                @if (!ModifyModal)
+                                {
+                                    <h5 class="modal-title">Add Provider</h5>
+                                }
+                                else 
+                                {
+                                    <h5 class="modal-title">Update Provider</h5>
+                                }
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddModal">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
