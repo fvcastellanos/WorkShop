@@ -41,6 +41,58 @@ namespace WorkShop.Services
             }
         }
 
+        public Either<string, DiscountTypeView> Add(DiscountTypeView discountTypeView)
+        {
+            try
+            {
+                var existing = _dbContext.DiscountTypes
+                    .Where(dt => dt.Name.ToLower().Equals(discountTypeView.Name.ToLower()))
+                    .FirstOrDefault();
+
+                if (existing != null)
+                {
+                    return $"Discount Type: {discountTypeView.Name} already exists";
+                }
+
+                var discountType = new DiscountType()
+                {
+                    Name = discountTypeView.Name,
+                    Description = discountTypeView.Description,
+                    Tenant = DefaultTenant
+                };
+
+                _dbContext.DiscountTypes.Add(discountType);
+                _dbContext.SaveChanges();
+
+                discountTypeView.Id = discountType.Id.ToString();
+
+                return discountTypeView;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"can't add discount type: {discountTypeView.Name} - ", ex.Message);
+                return $"Can't add discount type: {discountTypeView.Name}";
+            }
+        }
+
+        public Option<DiscountTypeView> FindById(string id)
+        {
+            try
+            {
+                return _dbContext.DiscountTypes
+                    .Where(dt => dt.Id.Equals(Guid.Parse(id)))
+                    .Select(ToView)
+                    .FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"can't find discount type with id: {id} - ", ex.Message);
+                return null;
+            }
+        }
+
+        // ------------------------------------------------------------------------
+
         private DiscountTypeView ToView(DiscountType discountType)
         {
             return new DiscountTypeView()

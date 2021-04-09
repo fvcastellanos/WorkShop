@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using WorkShop.Domain;
 using WorkShop.Services;
 
@@ -21,7 +22,8 @@ namespace WorkShop.Pages
             Search = new SearchView()
             {
                 TopRows = 25,
-                Name = ""
+                Name = "",
+                Active = 1
             };
 
             GetDiscountTypes();
@@ -41,22 +43,44 @@ namespace WorkShop.Pages
 
         protected void GetDiscountType(string id)
         {
+            var result = Service.FindById(id);
 
+            result.Match(ShowEditModal, 
+                () => DisplayModalError($"Discount Type with Id: {id} not found"));
         }
 
         protected void ShowAddModal()
         {
-
+            DiscountTypeView = new DiscountTypeView();
+            EditContext = new EditContext(DiscountTypeView);
+            HideModalError();
+            ShowModal();
         }
 
         protected override void Add()
         {
-            throw new System.NotImplementedException();
+            var result = Service.Add(DiscountTypeView);
+
+            result.Match(right => {
+
+                HideAddModal();
+                GetDiscountTypes();
+
+            }, DisplayModalError);
         }
 
         protected override void Update()
         {
             throw new System.NotImplementedException();
+        }
+
+        // -------------------------------------------------------------------
+
+        private void ShowEditModal(DiscountTypeView view)
+        {
+            DiscountTypeView = view;
+            EditContext = new EditContext(DiscountTypeView);
+            ShowEditModal();
         }
     }
 }
