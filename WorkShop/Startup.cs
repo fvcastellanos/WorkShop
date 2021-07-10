@@ -1,3 +1,5 @@
+using System;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -29,10 +31,22 @@ namespace WorkShop
             services.AddRazorPages();
             services.AddServerSideBlazor();
 
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie();
+
+            services.AddHttpContextAccessor();
+
+            services.AddHttpClient("strapi", options => {
+
+                options.BaseAddress = new Uri(Configuration["Strapi.Client.Url"]);
+            });
+
+            services.AddScoped<LoginService>();
             services.AddScoped<ProductService>();
             services.AddScoped<OperationTypeService>();
             services.AddScoped<ProviderService>();
             services.AddScoped<DiscountTypeService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,8 +68,12 @@ namespace WorkShop
 
             app.UseRouting();
 
+            app.UseAuthentication();
+            // app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapRazorPages();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
                 endpoints.MapAllActuators();

@@ -73,9 +73,9 @@
                         {
                             <tr>
                                 <td>
-                                    <button class="btn btn-secondary" @onclick="() => GetProvider(provider.Code)" >
+                                    <div @onclick="() => GetProvider(provider.Code)" style="cursor: pointer">
                                         <span class="oi oi-brush" aria-hidden="true"></span>
-                                    </button>                                    
+                                    </div>
                                 </td>
                                 <td>@provider.Code</td>
                                 <td>@provider.Name</td>
