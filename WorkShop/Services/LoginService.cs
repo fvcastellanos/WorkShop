@@ -1,11 +1,14 @@
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using LanguageExt;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using WorkShop.Clients;
 using WorkShop.Clients.Domain;
+using WorkShop.Services.Model;
 
 namespace WorkShop.Services
 {
@@ -14,20 +17,37 @@ namespace WorkShop.Services
         private readonly LoginClient _loginClient;
         private readonly HttpContext _httpContext;
 
-        public LoginService(LoginClient loginClient, HttpContext httpContext)
+        private readonly ILogger _logger;
+
+        public LoginService(LoginClient loginClient, IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory)
         {
             _loginClient = loginClient;
-            _httpContext = httpContext;
+            _httpContext = httpContextAccessor.HttpContext;
+            _logger = loggerFactory.CreateLogger<LoginService>();
         }
 
-        public async Task<Either<string, ClaimsPrincipal>> LoginUser(string user, string password)
+        public Either<string, AuthenticationResponse> LoginUser(string user, string password)
         {
-            var loginResponses = await _loginClient.PerformLoginAsync(user, password);
+            var loginResponse = _loginClient.PerformLogin(user, password);
 
-            if (loginResponses != null) 
+            if (loginResponse != null) 
             {
-                return await SignInUserAsync(loginResponses);
+                try {
 
+                    var principal = SignInUserAsync(loginResponse)
+                        .Result;
+
+                    return new AuthenticationResponse()
+                    {
+                        Token = loginResponse.Jwt,
+                        Principal = principal
+                    };                                    
+                }
+                catch (Exception ex) 
+                {
+                    _logger.LogError("Can't authenticate - {0}", ex.Message);
+                    return ex.Message;
+                }
             }
 
             return $"Unable to authenticate: {user}";
@@ -37,8 +57,7 @@ namespace WorkShop.Services
         {
             var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
             identity.AddClaim(new Claim(ClaimTypes.Email, loginResponse.User.Email));
-            identity.AddClaim(new Claim(ClaimTypes.UserData, loginResponse.User.Username));
-            identity.AddClaim(new Claim(ClaimTypes.Actor, loginResponse.Jwt));
+            identity.AddClaim(new Claim(ClaimTypes.Name, loginResponse.User.Username));
 
             var principal = new ClaimsPrincipal(identity);
 

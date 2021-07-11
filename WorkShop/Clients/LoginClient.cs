@@ -10,13 +10,13 @@ namespace WorkShop.Clients
 {
     public class LoginClient: BaseHttpClient
     {
-        private const string LoginResource = "/local/auth";
+        private const string LoginResource = "/auth/local";
 
-        public LoginClient(HttpClient httpClient) : base(httpClient)
+        public LoginClient(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
         {
         }
 
-        public async Task<LoginResponse> PerformLoginAsync(string user, string password)
+        public LoginResponse PerformLogin(string user, string password)
         {
             var request = new LoginRequest()
             {
@@ -27,12 +27,14 @@ namespace WorkShop.Clients
             var payload = JsonSerializer.Serialize(request);
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
-            using (var response = await HttpClient.PostAsync(LoginResource, content))
+            using (var response = HttpClient.PostAsync(LoginResource, content).Result)
             {
                 if (response.IsSuccessStatusCode)
                 {
-                    var responsePayload = await response.Content.ReadAsStringAsync();
-                    return JsonSerializer.Deserialize<LoginResponse>(responsePayload);
+                    var responsePayload = response.Content.ReadAsStringAsync()
+                        .Result;
+
+                    return JsonSerializer.Deserialize<LoginResponse>(responsePayload, JsonSerializerOptions);
                 }
 
             }

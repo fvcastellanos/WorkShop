@@ -1,15 +1,22 @@
 
 using System.Net.Http;
+using System.Text.Json;
 
 namespace WorkShop.Clients
 {
     public abstract class BaseHttpClient
     {
         protected readonly HttpClient HttpClient;
+        protected readonly JsonSerializerOptions JsonSerializerOptions;
 
-        public BaseHttpClient(HttpClient httpClient)
+        public BaseHttpClient(IHttpClientFactory httpClientFactory)
         {
-            HttpClient = httpClient;
+            HttpClient = httpClientFactory.CreateClient("strapi");
+
+            JsonSerializerOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
         }
     }
 }
