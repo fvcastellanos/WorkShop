@@ -1,15 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace WorkShop.Pages.Login.Model
+namespace WorkShop.Domain.Views
 {
     public class LoginModel
     {
-        [Required]
-        [MaxLength(50)]
+        [Required(ErrorMessage = "El usuario es requerido")]
         public string User { get; set; }
 
-        [Required]
-        [MaxLength(50)]
+        [Required(ErrorMessage = "La contraseña es requerida")]
         public string Password { get; set; }
     }
 }

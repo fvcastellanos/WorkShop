@@ -1,0 +1,51 @@
+@page
+@using WorkShop.Domain.Views
+@model LoginModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WorkShop - Ingreso de Usuarios</title>
+    <base href="~/" />
+    <link rel="stylesheet" href="css/bootswatch/cosmos.css"/>
+    <link href="open-iconic/font/css/open-iconic-bootstrap.css" rel="stylesheet">
+    <link href="css/site.css" rel="stylesheet" />
+</head>
+<body>
+
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-4">
+                <div class="card login-top" style="margin-top: 5em;">
+                    <!-- <img src="/assets/img/logo/RESTA Small.png" class="card-img-top" alt="Workshop Logo"> -->
+                    <div class="card-body">
+                    <h5 class="card-title">Iniciar sesión</h5>
+                    <p class="card-text">Ingrese sus credenciales para acceder a la aplicación</p>
+                    @using (Html.BeginForm("Login", "Login", FormMethod.Post))
+                    {
+                        <div class="mb-3">
+                            @Html.TextBoxFor(Model => Model.User, new { @class = "form-control", @placeholder = "Usuario", @id = "user" })
+                            @Html.ValidationMessageFor(Model => Model.User, String.Empty,  new { @class = "text-danger" })
+                        </div>
+                        <div class="mb-3">
+                            @Html.PasswordFor(Model => Model.Password, new { @class = "form-control", @placeholder = "Contraseña", @id = "password" })
+                            @Html.ValidationMessageFor(model => model.Password, String.Empty,  new { @class = "text-danger" })
+                        </div>                  
+
+                        <input type="submit" class="btn btn-primary" value="Ingresar" />
+                        <div style="margin-top: 1em;">
+                            <span class="text-danger">@Html.ValidationSummary()</span>        
+                        </div>
+                    }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/jquery/jquery.min.js"></script>
+    <script src="js/bootstrap/bootstrap.bundle.min.js"></script>
+</body>
+</html>

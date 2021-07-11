@@ -1,6 +1,6 @@
 using System;
+using Blazored.LocalStorage;
 using Blazored.SessionStorage;
-using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,20 +34,8 @@ namespace WorkShop
             services.AddRazorPages();
             services.AddServerSideBlazor();
 
-            services.AddAuthentication(options => {
-
-                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            }).AddCookie(options => {
-
-                options.Cookie.Name = "FOO_AUTH";
-                options.Cookie.IsEssential = true;
-                options.Cookie.HttpOnly = false;
-            });
-
-            // services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            //     .AddCookie();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie();
 
             services.AddHttpContextAccessor();
 
@@ -57,21 +45,15 @@ namespace WorkShop
                 options.BaseAddress = new Uri("http://localhost:1337");
             });
 
-            services.AddHttpClient("api", options => {
-
-                options.BaseAddress = new Uri("http://localhost:5000");
-            });
-
             services.AddBlazoredSessionStorage();
+            services.AddBlazoredLocalStorage();
 
             services.AddScoped<LoginClient>();
 
-            services.AddScoped<LoginService>();
             services.AddScoped<ProductService>();
             services.AddScoped<OperationTypeService>();
             services.AddScoped<ProviderService>();
             services.AddScoped<DiscountTypeService>();
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

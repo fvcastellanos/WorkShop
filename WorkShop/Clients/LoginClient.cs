@@ -2,7 +2,6 @@
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using LanguageExt;
 using WorkShop.Clients.Domain;
 
@@ -16,7 +15,7 @@ namespace WorkShop.Clients
         {
         }
 
-        public LoginResponse PerformLogin(string user, string password)
+        public Option<LoginResponse> PerformLogin(string user, string password)
         {
             var request = new LoginRequest()
             {
@@ -27,6 +26,16 @@ namespace WorkShop.Clients
             var payload = JsonSerializer.Serialize(request);
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
+            // return new LoginResponse
+            // {
+            //     Jwt = "test-jwt",
+            //     User = new User
+            //     {
+            //         Email = "jpenas@test.com",
+            //         Username = "jpenas"
+            //     }
+            // };
+
             using (var response = HttpClient.PostAsync(LoginResource, content).Result)
             {
                 if (response.IsSuccessStatusCode)
@@ -36,7 +45,6 @@ namespace WorkShop.Clients
 
                     return JsonSerializer.Deserialize<LoginResponse>(responsePayload, JsonSerializerOptions);
                 }
-
             }
 
             return null;

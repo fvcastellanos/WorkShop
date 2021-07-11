@@ -7,19 +7,15 @@
 
         <div class="col-md-12">
             <AuthorizeView>
-                <h1>Hello, @context.User.Identity.Name!</h1>
-                <p>You can only see this content if you're authenticated.</p>
+                <Authorized>
+                    <h1>Hello, @context.User.Identity.Name!</h1>
+                    <p>You can only see this content if you're authenticated.</p>
+                </Authorized>
+                <NotAuthorized>
+                    <h1>Authentication Failure!</h1>
+                    <p>You're not signed in.</p>
+                </NotAuthorized>
             </AuthorizeView>
-            <NotAuthorized>
-                <h1>Authentication Failure!</h1>
-                <p>You're not signed in.</p>
-            </NotAuthorized>
-            @* <h1>Hello, world!</h1>
-
-            Welcome to your new app.
-
-            <SurveyPrompt Title="How is Blazor working for you?" /> *@
-
         </div>
     </div>
 </div>
