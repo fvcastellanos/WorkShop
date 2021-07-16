@@ -18,5 +18,10 @@ namespace WorkShop.Clients
                 PropertyNameCaseInsensitive = true
             };
         }
+
+        protected T JsonDeserialize<T> (string jsonPayload)
+        {
+            return JsonSerializer.Deserialize<T>(jsonPayload, JsonSerializerOptions);
+        }
     }
 }
