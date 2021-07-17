@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LanguageExt;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using WorkShop.Domain;
 using WorkShop.Model;
@@ -16,7 +17,9 @@ namespace WorkShop.Services
 
         private readonly WorkShopContext _dbContext;
 
-        public OperationTypeService(ILogger<OperationTypeService> logger, WorkShopContext dbContext)
+        public OperationTypeService(ILogger<OperationTypeService> logger, 
+                                    WorkShopContext dbContext,
+                                    IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
             _dbContext = dbContext;

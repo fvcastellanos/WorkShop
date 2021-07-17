@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LanguageExt;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 using WorkShop.Domain;
 using WorkShop.Model;
 
@@ -15,7 +17,10 @@ namespace WorkShop.Services
 
         private readonly WorkShopContext _dbContext;
 
-        public DiscountTypeService(ILogger<DiscountTypeService> logger, WorkShopContext dbContext)
+        public DiscountTypeService(ILogger<DiscountTypeService> logger, 
+                                   WorkShopContext dbContext, 
+                                   JSRuntime jSRuntime,
+                                   IHttpContextAccessor httpContextAccessor): base(httpContextAccessor, jSRuntime)
         {
             _logger = logger;
             _dbContext = dbContext;

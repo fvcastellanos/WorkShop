@@ -5,8 +5,8 @@ namespace WorkShop.Clients.Domain
         public long Id { get; set; }
         public string Code { get; set; }
         public string Name { get; set; }
+        public string Contact { get; set; }
+        public string TaxId { get; set; }
         public string Description { get; set; }
-        public double MinimalAmount { get; set; }
-        public double SalePrice { get; set; }        
     }
 }

@@ -13,11 +13,18 @@ namespace WorkShop.Clients
         {
         }
 
-        public IEnumerable<Provider> Find(string token)
+        public IEnumerable<Provider> Find(string token, 
+                                          int topRows, 
+                                          string code, 
+                                          string name)
         {
-            HttpClient.DefaultRequestHeaders.Add("Authorization", token);
+            AddAuthenticationHeader(token);
 
-            using (var response = HttpClient.GetAsync(ProvidersResource).Result)
+            // GET /restaurants?_where[0][stars]=1&_where[1][pricing_lte]=20
+
+            var queryString = $"?_where[0][code_contains]={code}&_where[1][name_contains]={name}&_limit={topRows}";
+
+            using (var response = HttpClient.GetAsync(ProvidersResource + queryString).Result)
             {
                 if (response.IsSuccessStatusCode)
                 {
@@ -28,7 +35,7 @@ namespace WorkShop.Clients
                 }
             }
 
-            return null;
+            throw new HttpRequestException("Can't get provider list");
         }
 
     }

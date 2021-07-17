@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LanguageExt;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
+using WorkShop.Clients;
 using WorkShop.Domain;
 using WorkShop.Model;
 
@@ -14,11 +17,19 @@ namespace WorkShop.Services
 
         private readonly WorkShopContext _dbContext;
 
-        public ProviderService(ILogger<ProviderService> logger, WorkShopContext dbContext)
+        private readonly ProviderClient _providerClient;
+
+        public ProviderService(ILogger<ProviderService> logger, 
+                               WorkShopContext dbContext, 
+                               ProviderClient providerClient,
+                               IJSRuntime jSRuntime,
+                               IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor, jSRuntime)
         {
             _logger = logger;
             _dbContext = dbContext;
+            _providerClient = providerClient;
         }
+
 
         public Either<string, IEnumerable<ProviderView>> GetProviders(int topRows, string code, string name, int active)
         {
@@ -26,13 +37,19 @@ namespace WorkShop.Services
             {
                 _logger.LogInformation($"get top: {topRows} providers");
 
-                return _dbContext.Providers
-                    .Where(p => p.Active == active
-                        && p.Code.Contains(code)
-                        && p.Name.Contains(name))
+                var token = GetStrapiToken();
+
+                return _providerClient.Find(token, topRows, code, name)
                     .Select(ToView)
-                    .Take(topRows)
                     .ToList();
+
+                // return _dbContext.Providers
+                //     .Where(p => p.Active == active
+                //         && p.Code.Contains(code)
+                //         && p.Name.Contains(name))
+                //     .Select(ToView)
+                //     .Take(topRows)
+                //     .ToList();
             }
             catch (Exception ex)
             {
@@ -140,5 +157,19 @@ namespace WorkShop.Services
                 Active = provider.Active
             };
         }
+
+       private ProviderView ToView(WorkShop.Clients.Domain.Provider provider)
+        {
+            return new ProviderView()
+            {
+                Id = provider.Id.ToString(),
+                Name = provider.Name,
+                Code = provider.Code,
+                Contact = provider.Contact,
+                Description = provider.Description,
+                TaxId = provider.TaxId,
+            };
+        }
+         
     }
 }

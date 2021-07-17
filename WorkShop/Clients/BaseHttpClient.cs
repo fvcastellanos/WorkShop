@@ -23,5 +23,10 @@ namespace WorkShop.Clients
         {
             return JsonSerializer.Deserialize<T>(jsonPayload, JsonSerializerOptions);
         }
+
+        protected void AddAuthenticationHeader(string token) 
+        {
+            HttpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);            
+        }
     }
 }

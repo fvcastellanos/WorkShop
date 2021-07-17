@@ -49,6 +49,7 @@ namespace WorkShop
             services.AddBlazoredLocalStorage();
 
             services.AddScoped<LoginClient>();
+            services.AddScoped<ProviderClient>();
 
             services.AddScoped<ProductService>();
             services.AddScoped<OperationTypeService>();
