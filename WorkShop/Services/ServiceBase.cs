@@ -1,28 +1,26 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
 using Microsoft.JSInterop;
+using WorkShop.Providers;
 
 namespace WorkShop.Services
 {
     public abstract class ServiceBase
     {
 
-        private readonly IJSRuntime _jSRuntime;
+        public const string DefaultTenant = "foo";
+        private readonly HttpContext _httpContext;
+        private readonly TokenProvider _tokenProvider;
 
-        protected const string DefaultTenant = "default";
-        protected const string StrapiTokenKey = "strapiToken";
-
-        private HttpContext _httpContext;
-
-        public ServiceBase(IHttpContextAccessor httpContextAccessor, IJSRuntime jSRuntime)
+        public ServiceBase(IHttpContextAccessor httpContextAccessor, TokenProvider tokenProvider)
         {
             _httpContext = httpContextAccessor.HttpContext;
-            _jSRuntime = jSRuntime;
+            _tokenProvider = tokenProvider;
         }
 
         protected string GetStrapiToken()
         {
-            return _httpContext.Request.Cookies[StrapiTokenKey];
+            return _tokenProvider.GetToken(_httpContext.User.Identity.Name);
         }
     }
 }

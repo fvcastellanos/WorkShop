@@ -1,11 +1,13 @@
 
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 
 namespace WorkShop.Clients
 {
     public abstract class BaseHttpClient
     {
+        private const string AuthorizationHeaderName = "Authorization";
         protected readonly HttpClient HttpClient;
         protected readonly JsonSerializerOptions JsonSerializerOptions;
 
@@ -26,7 +28,20 @@ namespace WorkShop.Clients
 
         protected void AddAuthenticationHeader(string token) 
         {
-            HttpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);            
+            
+            if (HttpClient.DefaultRequestHeaders.Contains(AuthorizationHeaderName))
+            {
+                HttpClient.DefaultRequestHeaders.Remove(AuthorizationHeaderName);
+            }            
+
+            HttpClient.DefaultRequestHeaders.Add(AuthorizationHeaderName, "Bearer " + token);
         }
+
+        protected StringContent CreateStringContent(object obj)
+        {
+            var payload = JsonSerializer.Serialize(obj);
+            return new StringContent(payload, Encoding.UTF8, "application/json");
+        }
+
     }
 }

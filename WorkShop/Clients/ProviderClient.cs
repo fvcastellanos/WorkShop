@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text.Json;
+using LanguageExt;
 using WorkShop.Clients.Domain;
 
 namespace WorkShop.Clients
@@ -38,5 +38,36 @@ namespace WorkShop.Clients
             throw new HttpRequestException("Can't get provider list");
         }
 
+        public Option<Provider> FindById(string token, string id)
+        {
+            AddAuthenticationHeader(token);
+
+            var pathParam = $"/{id}";
+
+            using (var response = HttpClient.GetAsync(ProvidersResource + pathParam).Result)
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    var responsePayload = response.Content.ReadAsStringAsync()
+                        .Result;
+
+                    return JsonDeserialize<Provider>(responsePayload);
+                }
+            }
+
+            return null;
+        }
+
+        public void Add(string token, Provider provider)
+        {
+            var content = CreateStringContent(provider);
+            using (var response = HttpClient.PostAsync(ProvidersResource, content).Result)
+            {
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException("Can't add provider");
+                }
+            }
+        }
     }
 }

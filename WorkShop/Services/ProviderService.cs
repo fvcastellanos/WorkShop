@@ -4,10 +4,10 @@ using System.Linq;
 using LanguageExt;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.JSInterop;
 using WorkShop.Clients;
 using WorkShop.Domain;
 using WorkShop.Model;
+using WorkShop.Providers;
 
 namespace WorkShop.Services
 {
@@ -17,19 +17,21 @@ namespace WorkShop.Services
 
         private readonly WorkShopContext _dbContext;
 
+        private readonly TokenProvider _tokenProvider;
+
         private readonly ProviderClient _providerClient;
 
         public ProviderService(ILogger<ProviderService> logger, 
                                WorkShopContext dbContext, 
                                ProviderClient providerClient,
-                               IJSRuntime jSRuntime,
-                               IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor, jSRuntime)
+                               TokenProvider tokenProvider,
+                               IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor, tokenProvider)
         {
             _logger = logger;
             _dbContext = dbContext;
+            _tokenProvider = tokenProvider;
             _providerClient = providerClient;
         }
-
 
         public Either<string, IEnumerable<ProviderView>> GetProviders(int topRows, string code, string name, int active)
         {
@@ -42,14 +44,6 @@ namespace WorkShop.Services
                 return _providerClient.Find(token, topRows, code, name)
                     .Select(ToView)
                     .ToList();
-
-                // return _dbContext.Providers
-                //     .Where(p => p.Active == active
-                //         && p.Code.Contains(code)
-                //         && p.Name.Contains(name))
-                //     .Select(ToView)
-                //     .Take(topRows)
-                //     .ToList();
             }
             catch (Exception ex)
             {
@@ -62,28 +56,23 @@ namespace WorkShop.Services
         {
             try
             {
-                var holder = FindByCode(view.Code);
+                var holder = FindById(view.Code);
 
                 if (holder.IsSome)
                 {
                     return $"Provider code {view.Code} already exists";
                 }
 
-                var provider = new Provider()
+                var provider = new WorkShop.Clients.Domain.Provider()
                 {
                     Code = view.Code,
                     Name = view.Name,
                     Contact = view.Contact,
                     TaxId = view.TaxId,
-                    Description = view.Description,
-                    Tenant = DefaultTenant
+                    Description = view.Description
                 };
 
-                _logger.LogInformation($"Add new provider: {view.Name}");
-                _dbContext.Providers.Add(provider);
-                _dbContext.SaveChanges();
-
-                view.Id = provider.Id.ToString();
+                _providerClient.Add(GetStrapiToken(), provider);                
                 return view;
             }
             catch (Exception ex)
@@ -124,20 +113,19 @@ namespace WorkShop.Services
             }
         }
 
-        public Option<ProviderView> FindByCode(string code)
+        public Option<ProviderView> FindById(string id)
         {
             try
             {
-                _logger.LogInformation($"looking for provider with code: {code}");
+                _logger.LogInformation($"looking for provider with id: {id}");
 
-                return _dbContext.Providers
-                    .Where(p => p.Code.Equals(code))
-                    .Select(ToView)
-                    .FirstOrDefault();
+                var token = GetStrapiToken();
+                return _providerClient.FindById(token, id)
+                    .Map(ToView);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"can't find provider with code {code} - ", ex.Message);
+                _logger.LogError($"can't find provider with id {id} - {ex.Message}");
                 return null;
             }
         }

@@ -11,6 +11,7 @@ using Steeltoe.Connector.MySql.EFCore;
 using Steeltoe.Management.Endpoint;
 using WorkShop.Clients;
 using WorkShop.Model;
+using WorkShop.Providers;
 using WorkShop.Services;
 
 namespace WorkShop
@@ -44,6 +45,9 @@ namespace WorkShop
                 // options.BaseAddress = new Uri(Configuration["Strapi.Client.Url"]);
                 options.BaseAddress = new Uri("http://localhost:1337");
             });
+
+            services.AddMemoryCache();
+            services.AddSingleton<TokenProvider>();
 
             services.AddBlazoredSessionStorage();
             services.AddBlazoredLocalStorage();

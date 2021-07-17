@@ -7,23 +7,26 @@ using Microsoft.Extensions.Logging;
 using WorkShop.Clients;
 using WorkShop.Clients.Domain;
 using WorkShop.Domain.Views;
+using WorkShop.Providers;
 
 namespace WorkShop.Controllers
 {
     [Route("/Login")]
     public class LoginController: Controller
     {
-        private const string StrapiTokenCookieKey = "strapiToken";
         private readonly LoginClient _loginClient;
         private readonly HttpContext _httpContext;
+        private readonly TokenProvider _tokenProvider;
         private readonly ILogger _logger;
 
         public LoginController(LoginClient loginClient,
                                IHttpContextAccessor httpContextAccessor,
+                               TokenProvider tokenProvider,
                                ILoggerFactory loggerFactory)
         {
             _loginClient = loginClient;
             _httpContext = httpContextAccessor.HttpContext;
+            _tokenProvider = tokenProvider;
             _logger = loggerFactory.CreateLogger<LoginController>();
         }
 
@@ -32,7 +35,7 @@ namespace WorkShop.Controllers
         {
             if (Request.Query.ContainsKey("logout"))
             {
-                _httpContext.Response.Cookies.Delete(StrapiTokenCookieKey);
+                _tokenProvider.RemoveToken(_httpContext.User.Identity.Name);
                 _httpContext.SignOutAsync();
             }
 
@@ -71,9 +74,7 @@ namespace WorkShop.Controllers
                 };
 
                 _httpContext.SignInAsync(principal, authenticationProperties);
-                _httpContext.Response.Cookies.Append(StrapiTokenCookieKey, response.Jwt, new CookieOptions {
-                    MaxAge = TimeSpan.FromDays(30)
-                });
+                _tokenProvider.StoreToken(_httpContext.User.Identity.Name, response.Jwt);
                 authenticated = true;
 
                 _logger.LogInformation("Success authentication for user: {0}", loginModel.User);

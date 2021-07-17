@@ -38,12 +38,12 @@ namespace WorkShop.Pages
             result.Match(right => Providers = right, ShowErrorMessage);
         }
 
-        protected void GetProvider(string code)
+        protected void GetProvider(string id)
         {
-            var holder = Service.FindByCode(code);
+            var holder = Service.FindById(id);
 
             holder.Match(ShowEditModal, 
-                () => ShowErrorMessage($"Provider with code: {code} not found"));
+                () => ShowErrorMessage($"Provider with id: {id} not found"));
         }
 
         protected void ShowAddModal()

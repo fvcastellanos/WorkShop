@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using WorkShop.Domain;
 using WorkShop.Model;
+using WorkShop.Providers;
 
 namespace WorkShop.Services
 {
@@ -19,8 +20,8 @@ namespace WorkShop.Services
 
         public DiscountTypeService(ILogger<DiscountTypeService> logger, 
                                    WorkShopContext dbContext, 
-                                   JSRuntime jSRuntime,
-                                   IHttpContextAccessor httpContextAccessor): base(httpContextAccessor, jSRuntime)
+                                   TokenProvider tokenProvider,
+                                   IHttpContextAccessor httpContextAccessor): base(httpContextAccessor, tokenProvider)
         {
             _logger = logger;
             _dbContext = dbContext;
