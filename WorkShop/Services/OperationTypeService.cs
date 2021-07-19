@@ -80,7 +80,7 @@ namespace WorkShop.Services
                 {
                     Name = view.Name,
                     Description = view.Description,
-                    Active = view.Active,
+                    // Active = view.Active,
                     Inbound = view.Inbound,
                     Tenant = DefaultTenant
                 };
@@ -116,7 +116,7 @@ namespace WorkShop.Services
                 model.Name = view.Name;
                 model.Description = view.Description;
                 model.Inbound = view.Inbound;
-                model.Active = view.Active;
+                // model.Active = view.Active;
                 model.Updated = DateTime.Now;
 
                 _logger.LogInformation($"Update operation type: {view.Name}");
@@ -158,7 +158,7 @@ namespace WorkShop.Services
                 Id = operationType.Id.ToString(),
                 Name = operationType.Name,
                 Description = operationType.Description,
-                Active = operationType.Active,
+                // Active = operationType.Active,
                 Inbound = operationType.Inbound
             };
         }

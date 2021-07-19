@@ -14,17 +14,17 @@ namespace WorkShop.Pages
         protected IEnumerable<ProductView> Products = new List<ProductView>();
 
         protected ProductView ProductView;
-        protected int TopRows;
-        protected int Active;
-        protected string Code;
-        protected string Name;
 
+        protected SearchView SearchView;
         protected override void OnInitialized()
         {
-            TopRows = 25;
-            Active = 1;
-            Code = "";
-            Name = "";
+            SearchView = new SearchView
+            {
+                TopRows = 25,
+                Active = 1,
+                Code = "",
+                Name = "",
+            };
 
             HideAddModal();
             GetProducts();
@@ -33,7 +33,7 @@ namespace WorkShop.Pages
         protected void GetProducts()
         {
             HideErrorMessage();
-            var result = ProductService.GetProducts(TopRows, Code, Name, Active);
+            var result = ProductService.GetProducts(SearchView.TopRows, SearchView.Code, SearchView.Name, SearchView.Active);
             result.Match(right => Products = right, ShowErrorMessage);            
         }
 

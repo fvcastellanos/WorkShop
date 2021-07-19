@@ -5,8 +5,8 @@ using LanguageExt;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using WorkShop.Clients;
+using WorkShop.Clients.Domain;
 using WorkShop.Domain;
-using WorkShop.Model;
 using WorkShop.Providers;
 
 namespace WorkShop.Services
@@ -14,21 +14,14 @@ namespace WorkShop.Services
     public class ProviderService: ServiceBase
     {
         private readonly ILogger _logger;
-
-        private readonly WorkShopContext _dbContext;
-
         private readonly TokenProvider _tokenProvider;
-
         private readonly ProviderClient _providerClient;
-
         public ProviderService(ILogger<ProviderService> logger, 
-                               WorkShopContext dbContext, 
                                ProviderClient providerClient,
                                TokenProvider tokenProvider,
                                IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor, tokenProvider)
         {
             _logger = logger;
-            _dbContext = dbContext;
             _tokenProvider = tokenProvider;
             _providerClient = providerClient;
         }
@@ -41,7 +34,7 @@ namespace WorkShop.Services
 
                 var token = GetStrapiToken();
 
-                return _providerClient.Find(token, topRows, code, name)
+                return _providerClient.Find(token, topRows, code, name, active)
                     .Select(ToView)
                     .ToList();
             }
@@ -63,7 +56,7 @@ namespace WorkShop.Services
                     return $"Provider code {view.Code} already exists";
                 }
 
-                var provider = new WorkShop.Clients.Domain.Provider()
+                var provider = new Provider
                 {
                     Code = view.Code,
                     Name = view.Name,
@@ -86,23 +79,33 @@ namespace WorkShop.Services
         {
             try
             {
-                var id = Guid.Parse(view.Id);
-                var provider = _dbContext.Providers.Find(id);
+                var token = GetStrapiToken();
+                var providerHolder = _providerClient.FindById(token, view.Id);
+                var error = "";                
 
-                if (provider == null)
+                providerHolder.Match(some => {
+                    
+                    var update = new Provider
+                    {
+                        Id = long.Parse(view.Id),
+                        Name = view.Name,
+                        Code = view.Code,
+                        Contact = view.Contact,
+                        TaxId = view.TaxId,
+                        Description = view.Description,
+                        Active = view.Active.Equals(1)
+                    };
+
+                    _providerClient.Update(token, update);
+                }, () => {
+
+                    error = $"Provider: {view.Name} not found";
+                });
+
+                if (!String.IsNullOrEmpty(error))
                 {
-                    return $"Provider: {view.Name} not found";
+                    return error;
                 }
-
-                provider.Name = view.Name;
-                provider.Code = view.Code;
-                provider.Contact = view.Contact;
-                provider.TaxId = view.TaxId;
-                provider.Description = view.Description;
-                provider.Active = view.Active;
-
-                _dbContext.Providers.Update(provider);
-                _dbContext.SaveChanges();
 
                 return view;
             }
@@ -132,7 +135,7 @@ namespace WorkShop.Services
 
         // ---------------------------------------------------------------------------
 
-        private ProviderView ToView(Provider provider)
+       private ProviderView ToView(Provider provider)
         {
             return new ProviderView()
             {
@@ -142,22 +145,8 @@ namespace WorkShop.Services
                 Contact = provider.Contact,
                 Description = provider.Description,
                 TaxId = provider.TaxId,
-                Active = provider.Active
+                Active = provider.Active ? 1 : 0
             };
-        }
-
-       private ProviderView ToView(WorkShop.Clients.Domain.Provider provider)
-        {
-            return new ProviderView()
-            {
-                Id = provider.Id.ToString(),
-                Name = provider.Name,
-                Code = provider.Code,
-                Contact = provider.Contact,
-                Description = provider.Description,
-                TaxId = provider.TaxId,
-            };
-        }
-         
+        }         
     }
 }

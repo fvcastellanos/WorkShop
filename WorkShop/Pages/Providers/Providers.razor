@@ -5,41 +5,41 @@
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-10">
-            <h2>Providers</h2>
-            <p>Providers catalog</p>
+            <h2>Proveedores</h2>
+            <p>Catálogo de proveedores</p>
 
             <div class="top-separator">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Search</h4>
+                        <h4 class="card-title">Buscar</h4>
                         <fieldset>
                             <div class="row">
                                 <div class="col-5">
                                     <div class="form-group">
-                                        <label for="searchCode">Code</label>
-                                        <input type="text" class="form-control" id="searchCode" placeholder="Code" @bind="SearchView.Code">
+                                        <label for="searchCode">Código</label>
+                                        <input type="text" class="form-control" id="searchCode" placeholder="Código" @bind="SearchView.Code">
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-group">
-                                        <label for="searchName">Name</label>
-                                        <input type="text" class="form-control" id="searchName" placeholder="Name" @bind="SearchView.Name">
+                                        <label for="searchName">Nombre</label>
+                                        <input type="text" class="form-control" id="searchName" placeholder="Nombre" @bind="SearchView.Name">
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col">
                                     <div class="form-group">
-                                        <label for="searchActive">Active</label>
+                                        <label for="searchActive">Activo</label>
                                         <select class="custom-select" id="searchActive" @bind="SearchView.Active">
-                                            <option value="1">Y</option>
-                                            <option value="0">N</option>
+                                            <option value="1">Si</option>
+                                            <option value="0">No</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-group">
-                                        <label for="top">Rows</label>
+                                        <label for="top">Filas</label>
                                         <select class="custom-select" id="top" @bind="SearchView.TopRows">
                                             <option value="10">10</option>
                                             <option selected="25">25</option>
@@ -50,8 +50,8 @@
                                     </div>                            
                                 </div>
                             </div>
-                            <input type="button" class="btn btn-secondary" value="Search" @onclick="GetProviders" />
-                            <input type="button" class="btn btn-primary" value="Add Provider" @onclick="ShowAddModal" />
+                            <input type="button" class="btn btn-secondary" value="Buscar" @onclick="GetProviders" />
+                            <input type="button" class="btn btn-primary" value="Agregar Proveedor" @onclick="ShowAddModal" />
                         </fieldset>
                     </div>
                 </div>
@@ -63,19 +63,22 @@
                 <table class="table table-striped">
                     <thead>
                         <th>#</th>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Tax Id</th>
-                        <th>Active</th>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Nit</th>
+                        <th>Activo</th>
                     </thead>
                     <tbody>
                         @foreach (var provider in Providers)
                         {
                             <tr>
                                 <td>
-                                    <div @onclick="() => GetProvider(provider.Id)" style="cursor: pointer">
+                                    <div @onclick="() => GetProvider(provider.Id)" class="crud-icon">
                                         <span class="oi oi-brush" aria-hidden="true"></span>
                                     </div>
+                                    @* <div class="crud-icon">
+                                        <span class="oi oi-trash" aria-hidden="true"></span>
+                                    </div> *@
                                 </td>
                                 <td>@provider.Code</td>
                                 <td>@provider.Name</td>
@@ -95,11 +98,11 @@
                             <div class="modal-header">
                                 @if (!ModifyModal)
                                 {
-                                    <h5 class="modal-title">Add Provider</h5>
+                                    <h5 class="modal-title">Agregar Proveedor</h5>
                                 }
                                 else 
                                 {
-                                    <h5 class="modal-title">Update Provider</h5>
+                                    <h5 class="modal-title">Actualizar Proveedor</h5>
                                 }
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddModal">
                                     <span aria-hidden="true">&times;</span>
@@ -113,38 +116,38 @@
                                     <DataAnnotationsValidator/>
                                     <ValidationSummary/>
                                     <div class="form-group">
-                                        <label for="code">Code</label>
-                                        <input type="text" class="form-control" id="code" placeholder="Code" @bind="ProviderView.Code"/>
+                                        <label for="code">Código</label>
+                                        <input type="text" class="form-control" id="code" placeholder="Código" @bind="ProviderView.Code"/>
                                     </div>
                                     <div class="form-group">
-                                        <label for="name">Name</label>
-                                        <input type="text" class="form-control" id="name" placeholder="Name" @bind="ProviderView.Name"/>
+                                        <label for="name">Nombre</label>
+                                        <input type="text" class="form-control" id="name" placeholder="Nombre" @bind="ProviderView.Name"/>
                                     </div>
                                     <div class="form-group">
-                                        <label for="taxId">Tax Id</label>
-                                        <input type="text" class="form-control" id="taxId" placeholder="Tax Id" @bind="ProviderView.TaxId"/>
+                                        <label for="taxId">Nit</label>
+                                        <input type="text" class="form-control" id="taxId" placeholder="Nit" @bind="ProviderView.TaxId"/>
                                     </div>
                                     <div class="form-group">
-                                        <label for="contact">Contact</label>
-                                        <input type="text" class="form-control" id="contact" placeholder="Contact" @bind="ProviderView.Contact"/>
+                                        <label for="contact">Contacto</label>
+                                        <input type="text" class="form-control" id="contact" placeholder="Contacto" @bind="ProviderView.Contact"/>
                                     </div>
                                     <div class="form-group">
-                                        <label for="description">Description</label>
+                                        <label for="description">Descripción</label>
                                         <textarea class="form-control" id="description" @bind="ProviderView.Description" row="4"></textarea>
                                     </div>
                                     @if (ModifyModal)
                                     {
-                                        <label for="active">Active</label>
+                                        <label for="active">Activo</label>
                                         <div id="active" class="form-group">
                                             <select class="form-control" @bind="ProviderView.Active">
-                                                <option value="0">N</option>
-                                                <option value="1">Y</option>
+                                                <option value="0">No</option>
+                                                <option value="1">Si</option>
                                             </select>
                                         </div>
                                     }
 
-                                    <input type="submit" class="btn btn-primary" value="Save" @onclick="SaveChanges" />
-                                    <input type="button" class="btn btn-secondary" value="Cancel" @onclick="HideAddModal"/>
+                                    <input type="submit" class="btn btn-primary" value="Guardar" @onclick="SaveChanges" />
+                                    <input type="button" class="btn btn-secondary" value="Cancelar" @onclick="HideAddModal"/>
                                 </EditForm>
                             </div>
                         </div>

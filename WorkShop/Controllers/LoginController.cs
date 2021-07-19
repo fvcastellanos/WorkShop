@@ -74,7 +74,7 @@ namespace WorkShop.Controllers
                 };
 
                 _httpContext.SignInAsync(principal, authenticationProperties);
-                _tokenProvider.StoreToken(_httpContext.User.Identity.Name, response.Jwt);
+                _tokenProvider.StoreToken(loginModel.User, response.Jwt);
                 authenticated = true;
 
                 _logger.LogInformation("Success authentication for user: {0}", loginModel.User);

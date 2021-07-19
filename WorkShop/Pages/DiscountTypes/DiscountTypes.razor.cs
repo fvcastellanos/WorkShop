@@ -19,7 +19,7 @@ namespace WorkShop.Pages
 
         protected override void OnInitialized()
         {
-            Search = new SearchView()
+            Search = new SearchView
             {
                 TopRows = 25,
                 Name = "",

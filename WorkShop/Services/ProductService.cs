@@ -27,7 +27,7 @@ namespace WorkShop.Services
                 _logger.LogInformation("get top {0} products with active value {1}", top, active);
 
                 return _dbContext.Products
-                    .Where(product => product.Active == active
+                    .Where(product => product.Active.Equals(active)
                             && product.Code.Contains(code)
                             && product.Name.Contains(name))
                     .Select(ToProductView)
@@ -89,7 +89,7 @@ namespace WorkShop.Services
                 product.Description = productView.Description;
                 product.Code = productView.Code;
                 product.MinimalAmount = productView.MinimalAmount;
-                product.Active = productView.Active;
+                // product.Active = productView.Active
                 product.Updated = DateTime.Now;
 
                 _dbContext.Products.Update(product);
@@ -136,7 +136,7 @@ namespace WorkShop.Services
                 SalePrice = product.SalePrice,
                 Created = product.Created,
                 Updated = product.Updated,
-                Active = product.Active
+                // Active = product.Active
             };
         }
 
@@ -152,7 +152,7 @@ namespace WorkShop.Services
                 SalePrice = productView.SalePrice,
                 Created = productView.Created,
                 Updated = productView.Updated,
-                Active = productView.Active
+                // Active = productView.Active
             };
         }
     }

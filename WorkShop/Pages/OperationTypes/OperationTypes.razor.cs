@@ -17,13 +17,17 @@ namespace WorkShop.Pages
         protected int Active;
         protected string Code;
         protected string Name;
+        protected SearchView searchView;
 
         protected override void OnInitialized()
         {
-            TopRows = 25;
-            Active = 1;
-            Code = "";
-            Name = "";
+            searchView = new SearchView
+            {
+                TopRows = 25,
+                Active = 1,
+                Code = "",
+                Name = ""
+            };
 
             HideAddModal();
             GetOperationTypes();

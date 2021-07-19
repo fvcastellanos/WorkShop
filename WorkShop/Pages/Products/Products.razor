@@ -16,13 +16,13 @@
                                 <div class="col-5">
                                     <div class="form-group">
                                         <label for="searchCode">Code</label>
-                                        <input type="text" class="form-control" id="searchCode" placeholder="Code" @bind="Code">
+                                        <input type="text" class="form-control" id="searchCode" placeholder="Code" @bind="SearchView.Code">
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-group">
                                         <label for="searchName">Name</label>
-                                        <input type="text" class="form-control" id="searchName" placeholder="Name" @bind="Name">
+                                        <input type="text" class="form-control" id="searchName" placeholder="Name" @bind="SearchView.Name">
                                     </div>
                                 </div>
                             </div>
@@ -31,7 +31,7 @@
                                 <div class="col">
                                     <div class="form-group">
                                         <label for="searchActive">Active</label>
-                                        <select class="custom-select" id="searchActive" @bind="Active">
+                                        <select class="custom-select" id="searchActive" @bind="SearchView.Active">
                                             <option value="1">Y</option>
                                             <option value="0">N</option>
                                         </select>
@@ -40,7 +40,7 @@
                                 <div class="col">
                                     <div class="form-group">
                                         <label for="top">Rows</label>
-                                        <select class="custom-select" id="top" @bind="TopRows">
+                                        <select class="custom-select" id="top" @bind="SearchView.TopRows">
                                             <option value="10">10</option>
                                             <option selected="25">25</option>
                                             <option value="50">50</option>
@@ -80,7 +80,7 @@
                                 <td>@product.Code</td>
                                 <td>@product.Name</td>
                                 <td>@product.MinimalAmount</td>
-                                <td><BooleanField Value="@product.Active"/></td>
+                                @* <td><BooleanField Value="@product.Active"/></td> *@
                             </tr>
                         }
                     </tbody>

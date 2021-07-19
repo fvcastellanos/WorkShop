@@ -20,6 +20,6 @@ namespace WorkShop.Domain
         public double SalePrice { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
-        public int Active { get; set; }        
+        public bool Active { get; set; }        
     }
 }

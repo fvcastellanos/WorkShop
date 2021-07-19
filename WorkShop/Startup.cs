@@ -47,7 +47,7 @@ namespace WorkShop
             });
 
             services.AddMemoryCache();
-            services.AddSingleton<TokenProvider>();
+            services.AddScoped<TokenProvider>();
 
             services.AddBlazoredSessionStorage();
             services.AddBlazoredLocalStorage();
