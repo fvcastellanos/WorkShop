@@ -5,58 +5,59 @@ using WorkShop.Clients.Domain;
 
 namespace WorkShop.Clients
 {
-    public class ProviderClient : BaseHttpClient
+    public class ProductClient : BaseHttpClient
     {
-        private const string ProvidersResource = "/providers";
+        private const string ProductsResource = "/products";
 
-        public ProviderClient(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+        public ProductClient(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
         {
         }
 
-        public IEnumerable<Provider> Find(string token, 
-                                          int topRows, 
-                                          string code, 
-                                          string name,
-                                          int active)
+        public IEnumerable<Product> Find(string token,
+                                         int topRows,
+                                         string code,
+                                         string name,
+                                         int active)
         {
             AddAuthenticationHeader(token);
 
             // GET /restaurants?_where[0][stars]=1&_where[1][pricing_lte]=20
 
             var queryString = $"?_where[0][code_contains]={code}&_where[1][name_contains]={name}&_where[2][active]={active}&_limit={topRows}";
+            var url = $"{ProductsResource}{queryString}";
 
-            using (var response = HttpClient.GetAsync(ProvidersResource + queryString).Result)
+            using (var response = HttpClient.GetAsync(url).Result)
             {
                 if (response.IsSuccessStatusCode)
                 {
                     var responsePayload = response.Content.ReadAsStringAsync()
                         .Result;
 
-                    return JsonDeserialize<List<Provider>>(responsePayload);
+                    return JsonDeserialize<List<Product>>(responsePayload);
                 }
             }
 
-            throw new HttpRequestException("Can't get provider list");
+            throw new HttpRequestException("Can't get product list");
         }
 
-        public Option<Provider> FindById(string token, string id)
+        public Option<Product> FindById(string token, string id)
         {
             AddAuthenticationHeader(token);
 
-            var pathParam = $"/{id}";
+            var url = $"{ProductsResource}/{id}";
 
-            using (var response = HttpClient.GetAsync(ProvidersResource + pathParam).Result)
+            using (var response = HttpClient.GetAsync(url).Result)
             {
                 if (response.IsSuccessStatusCode)
                 {
                     var responsePayload = response.Content.ReadAsStringAsync()
                         .Result;
 
-                    return JsonDeserialize<Provider>(responsePayload);
+                    return JsonDeserialize<Product>(responsePayload);
                 }
 
-                if (response.StatusCode.Equals(404)) {
-
+                if (response.StatusCode.Equals(404))
+                {
                     return null;
                 }
             }
@@ -64,26 +65,25 @@ namespace WorkShop.Clients
             throw new HttpRequestException($"Can't search provider with Id: {id}");
         }
 
-        public void Add(string token, Provider provider)
+        public void Add(string token, Product provider)
         {
             AddAuthenticationHeader(token);
 
             var content = CreateStringContent(provider);
-
-            using (var response = HttpClient.PostAsync(ProvidersResource, content).Result)
+            using (var response = HttpClient.PostAsync(ProductsResource, content).Result)
             {
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new HttpRequestException("Can't add provider");
+                    throw new HttpRequestException("Can't add product");
                 }
             }
         }
 
-        public void Update(string token, Provider provider)
+        public void Update(string token, Product provider)
         {
             AddAuthenticationHeader(token);
 
-            var url = ProvidersResource + $"/{provider.Id}";
+            var url = $"{ProductsResource}/{provider.Id}";
             var content = CreateStringContent(provider);
 
             using (var response = HttpClient.PutAsync(url, content).Result)

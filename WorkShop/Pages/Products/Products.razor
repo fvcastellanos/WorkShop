@@ -5,24 +5,24 @@
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-10">
-            <h2>Products</h2>
+            <h2>Productos</h2>
 
             <div class="top-separator">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Search</h4>
+                        <h4 class="card-title">Búsqueda</h4>
                         <fieldset>
                             <div class="row">
                                 <div class="col-5">
                                     <div class="form-group">
-                                        <label for="searchCode">Code</label>
-                                        <input type="text" class="form-control" id="searchCode" placeholder="Code" @bind="SearchView.Code">
+                                        <label for="searchCode">Código</label>
+                                        <input type="text" class="form-control" id="searchCode" placeholder="Código" @bind="SearchView.Code">
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-group">
-                                        <label for="searchName">Name</label>
-                                        <input type="text" class="form-control" id="searchName" placeholder="Name" @bind="SearchView.Name">
+                                        <label for="searchName">Nombre</label>
+                                        <input type="text" class="form-control" id="searchName" placeholder="Nombre" @bind="SearchView.Name">
                                     </div>
                                 </div>
                             </div>
@@ -30,10 +30,10 @@
                             <div class="row">
                                 <div class="col">
                                     <div class="form-group">
-                                        <label for="searchActive">Active</label>
+                                        <label for="searchActive">Activo</label>
                                         <select class="custom-select" id="searchActive" @bind="SearchView.Active">
-                                            <option value="1">Y</option>
-                                            <option value="0">N</option>
+                                            <option value="1">Si</option>
+                                            <option value="0">No</option>
                                         </select>
                                     </div>
                                 </div>
@@ -50,8 +50,8 @@
                                     </div>                            
                                 </div>
                             </div>
-                            <input type="button" class="btn btn-secondary" value="Search" @onclick="Search" />
-                            <input type="button" class="btn btn-primary" value="Add Product" @onclick="ShowAddModal" />
+                            <input type="button" class="btn btn-secondary" value="Buscar" @onclick="Search" />
+                            <input type="button" class="btn btn-primary" value="Agregar Producto" @onclick="ShowAddModal" />
                         </fieldset>
                     </div>
                 </div>
@@ -63,24 +63,24 @@
                 <table class="table table-striped">
                     <thead>
                         <th>#</th>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Minimal Amount</th>
-                        <th>Active</th>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Cantidad Mínima</th>
+                        <th>Activo</th>
                     </thead>
                     <tbody>
                         @foreach (var product in Products)
                         {
                             <tr>
                                 <td>
-                                    <button class="btn btn-secondary" @onclick="() => GetProduct(product.Code)" >
+                                    <div @onclick="() => GetProduct(product.Id)" class="crud-icon"> 
                                         <span class="oi oi-brush" aria-hidden="true"></span>
-                                    </button>                                    
+                                    </div>
                                 </td>
                                 <td>@product.Code</td>
                                 <td>@product.Name</td>
                                 <td>@product.MinimalAmount</td>
-                                @* <td><BooleanField Value="@product.Active"/></td> *@
+                                <td><BooleanField Value="@product.Active"/></td>
                             </tr>
                         }
                     </tbody>
@@ -95,11 +95,11 @@
                             <div class="modal-header">
                                 @if (ModifyModal)
                                 {
-                                    <h5 class="modal-title">Update Product</h5>
+                                    <h5 class="modal-title">Actualizar Producto</h5>
                                 }
                                 else
                                 {
-                                    <h5 class="modal-title">Add Product</h5>
+                                    <h5 class="modal-title">Agregar Producto</h5>
                                 }
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddModal">
                                     <span aria-hidden="true">&times;</span>
@@ -113,34 +113,34 @@
                                     <DataAnnotationsValidator/>
                                     <ValidationSummary/>
                                     <div class="form-group">
-                                        <label for="name">Code</label>
-                                        <input type="text" class="form-control" id="code" placeholder="Code" @bind="ProductView.Code"/>
+                                        <label for="name">Código</label>
+                                        <input type="text" class="form-control" id="code" placeholder="Código" @bind="ProductView.Code"/>
                                     </div>
                                     <div class="form-group">
-                                        <label for="name">Name</label>
-                                        <input type="text" class="form-control" id="name" placeholder="Name" @bind="ProductView.Name"/>
+                                        <label for="name">Nombre</label>
+                                        <input type="text" class="form-control" id="name" placeholder="Nombre" @bind="ProductView.Name"/>
                                     </div>
                                     <div class="form-group">
-                                        <label for="description">Description</label>
+                                        <label for="description">Descripción</label>
                                         <textarea class="form-control" id="description" @bind="ProductView.Description" row="4"></textarea>
                                     </div>
                                     <div class="form-group">
-                                        <label for="minimalAmount">Minimal Amount</label>
+                                        <label for="minimalAmount">Cantidad Mínima</label>
                                         <input type="number" class="form-control" id="minimalAmount" @bind="ProductView.MinimalAmount"/>
                                     </div>                                        
                                     @if (ModifyModal)
                                     {
-                                        <label>Active</label>
+                                        <label>Activo</label>
                                         <div class="form-group">
                                             <select class="form-control" @bind="ProductView.Active">
-                                                <option value="0">N</option>
-                                                <option value="1">Y</option>
+                                                <option value="0">No</option>
+                                                <option value="1">Si</option>
                                             </select>
                                         </div>
                                     }
 
-                                    <input type="submit" class="btn btn-primary" value="Save" @onclick="SaveChanges" />
-                                    <input type="button" class="btn btn-secondary" value="Cancel" @onclick="HideAddModal"/>
+                                    <input type="submit" class="btn btn-primary" value="Guardar" @onclick="SaveChanges" />
+                                    <input type="button" class="btn btn-secondary" value="Cancelar" @onclick="HideAddModal"/>
                                 </EditForm>
                             </div>
                         </div>

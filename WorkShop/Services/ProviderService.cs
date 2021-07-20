@@ -62,7 +62,8 @@ namespace WorkShop.Services
                     Name = view.Name,
                     Contact = view.Contact,
                     TaxId = view.TaxId,
-                    Description = view.Description
+                    Description = view.Description,
+                    Active = true
                 };
 
                 _providerClient.Add(GetStrapiToken(), provider);                

@@ -42,12 +42,12 @@ namespace WorkShop.Pages
             GetProducts();
         }
 
-        protected void GetProduct(string code)
+        protected void GetProduct(string id)
         {
-            var result = ProductService.FindByCode(code);
+            var result = ProductService.FindById(id);
 
             result.Some(ShowEditModal)
-                .None(() => ShowErrorMessage($"Code {code} not found"));
+                .None(() => ShowErrorMessage($"Id: {id} not found"));
         }
 
         protected void ShowAddModal()
