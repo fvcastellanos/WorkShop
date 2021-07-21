@@ -1,3 +1,7 @@
+using System;
+using Blazored.LocalStorage;
+using Blazored.SessionStorage;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -5,7 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Steeltoe.Connector.MySql.EFCore;
 using Steeltoe.Management.Endpoint;
+using WorkShop.Clients;
 using WorkShop.Model;
+using WorkShop.Providers;
 using WorkShop.Services;
 
 namespace WorkShop
@@ -29,6 +35,29 @@ namespace WorkShop
             services.AddRazorPages();
             services.AddServerSideBlazor();
 
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie();
+
+            services.AddHttpContextAccessor();
+
+            services.AddHttpClient("strapi", options => {
+
+                // options.BaseAddress = new Uri(Configuration["Strapi.Client.Url"]);
+                options.BaseAddress = new Uri("http://localhost:1337");
+            });
+
+            services.AddMemoryCache();
+            services.AddScoped<TokenProvider>();
+
+            services.AddBlazoredSessionStorage();
+            services.AddBlazoredLocalStorage();
+
+            services.AddScoped<LoginClient>();
+            services.AddScoped<ProviderClient>();
+            services.AddScoped<ProductClient>();
+            services.AddScoped<OperationTypeClient>();
+            services.AddScoped<DiscountTypeClient>();
+
             services.AddScoped<ProductService>();
             services.AddScoped<OperationTypeService>();
             services.AddScoped<ProviderService>();
@@ -49,16 +78,21 @@ namespace WorkShop
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapRazorPages();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
                 endpoints.MapAllActuators();
+                endpoints.MapControllers();
             });
         }
     }

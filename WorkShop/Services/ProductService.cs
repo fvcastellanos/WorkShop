@@ -3,21 +3,27 @@ using System.Linq;
 using System.Collections.Generic;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
-using WorkShop.Model;
 using WorkShop.Domain;
+using WorkShop.Clients;
+using WorkShop.Providers;
+using Microsoft.AspNetCore.Http;
+using WorkShop.Clients.Domain;
 
 namespace WorkShop.Services
 {
-    public class ProductService
+    public class ProductService: ServiceBase
     {
-        private const string DefaultTenant = "default";
         private readonly ILogger _logger;
-        private readonly WorkShopContext _dbContext;
 
-        public ProductService(ILogger<ProductService> logger, WorkShopContext dbContext)
+        private readonly ProductClient _productClient;
+
+        public ProductService(ILogger<ProductService> logger, 
+                              ProductClient productClient,
+                              IHttpContextAccessor httpContextAccessor,
+                              TokenProvider tokenProvider): base(httpContextAccessor, tokenProvider)
         {
             _logger = logger;
-            _dbContext = dbContext;
+            _productClient = productClient;
         }
 
         public Either<string, IEnumerable<ProductView>> GetProducts(int top = 25, string code = "", string name = "", int active = 1)
@@ -26,12 +32,8 @@ namespace WorkShop.Services
             {
                 _logger.LogInformation("get top {0} products with active value {1}", top, active);
 
-                return _dbContext.Products
-                    .Where(product => product.Active == active
-                            && product.Code.Contains(code)
-                            && product.Name.Contains(name))
+                return _productClient.Find(GetStrapiToken(), top, code, name, active)
                     .Select(ToProductView)
-                    .Take(top)
                     .ToList();
             }
             catch (Exception ex)
@@ -45,7 +47,7 @@ namespace WorkShop.Services
         {
             try
             {
-                var productHolder = FindByCode(productView.Code);
+                var productHolder = FindById(productView.Code);
 
                 if (productHolder.IsSome) {
 
@@ -58,11 +60,10 @@ namespace WorkShop.Services
                         Name = productView.Name,
                         Description = productView.Description,
                         MinimalAmount = productView.MinimalAmount,
-                        Tenant = DefaultTenant
+                        Active = true
                 };
 
-                _dbContext.Products.Add(product);
-                _dbContext.SaveChanges();
+                _productClient.Add(GetStrapiToken(), product);
 
                 return productView;
             }
@@ -77,23 +78,22 @@ namespace WorkShop.Services
         {
             try
             {
-                var id = Guid.Parse(productView.Id);
-                var product = _dbContext.Products.Find(id);
+                
+                var productHolder = FindById(productView.Id);
+                var error = "";                
 
-                if (product == null)
+                productHolder.Match(some => {
+                    
+                    var product = ToProduct(productView);
+
+                    _productClient.Update(GetStrapiToken(), product);
+
+                }, () => error = $"Product with id: {productView.Id} not found");
+
+                if (!String.IsNullOrEmpty(error))
                 {
-                    return $"Product with id: {productView.Id} not found";
+                    return error;
                 }
-
-                product.Name = productView.Name;
-                product.Description = productView.Description;
-                product.Code = productView.Code;
-                product.MinimalAmount = productView.MinimalAmount;
-                product.Active = productView.Active;
-                product.Updated = DateTime.Now;
-
-                _dbContext.Products.Update(product);
-                _dbContext.SaveChanges();
 
                 return productView;
             }
@@ -104,20 +104,16 @@ namespace WorkShop.Services
             }
         }
 
-        public Option<ProductView> FindByCode(string code)
+        public Option<ProductView> FindById(string id)
         {
             try
             {
-                var product = _dbContext.Products
-                    .Where(product => product.Code.Equals(code))
-                    .Select(ToProductView)
-                    .FirstOrDefault();
-
-                return product;
+                return _productClient.FindById(GetStrapiToken(), id)
+                    .Map(ToProductView);
             }
             catch (Exception ex)
             {
-                _logger.LogError("can't find product using code: {0} - {1} ", code, ex.Message);
+                _logger.LogError("can't find product using id: {0} - {1} ", id, ex.Message);
                 return null;
             }
         }
@@ -134,9 +130,7 @@ namespace WorkShop.Services
                 Description = product.Description,
                 MinimalAmount = product.MinimalAmount,
                 SalePrice = product.SalePrice,
-                Created = product.Created,
-                Updated = product.Updated,
-                Active = product.Active
+                Active = product.Active ? 1 : 0
             };
         }
 
@@ -144,15 +138,13 @@ namespace WorkShop.Services
         {
             return new Product()
             {
-                Id = Guid.Parse(productView.Id),
+                Id = long.Parse(productView.Id),
                 Code = productView.Code,
                 Name = productView.Name,
                 Description = productView.Description,
                 MinimalAmount = productView.MinimalAmount,
                 SalePrice = productView.SalePrice,
-                Created = productView.Created,
-                Updated = productView.Updated,
-                Active = productView.Active
+                Active = productView.Active.Equals(1)
             };
         }
     }

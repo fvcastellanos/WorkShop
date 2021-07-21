@@ -8,6 +8,12 @@
     margin-top: 1em;
 }
 
+.crud-icon {
+    cursor: pointer;
+    display: inline;
+    margin-left: 1em;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;

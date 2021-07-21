@@ -19,7 +19,7 @@ namespace WorkShop.Pages
 
         protected override void OnInitialized()
         {
-            Search = new SearchView()
+            Search = new SearchView
             {
                 TopRows = 25,
                 Name = "",
@@ -71,7 +71,16 @@ namespace WorkShop.Pages
 
         protected override void Update()
         {
-            throw new System.NotImplementedException();
+            var result = Service.Update(DiscountTypeView);
+
+            result.Match(right => {
+                
+                HideModalError();
+                HideModal();
+                GetDiscountTypes();
+
+            }, DisplayModalError);
+
         }
 
         // -------------------------------------------------------------------

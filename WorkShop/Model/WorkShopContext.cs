@@ -11,6 +11,7 @@ namespace WorkShop.Model
         public virtual DbSet<Provider> Providers { get; set; }
         public virtual DbSet<ProviderInvoice> ProviderInvoices { get; set; }
         public virtual DbSet<Inventory> Inventories { get; set; }
+        public virtual DbSet<UserToken> UserTokens { get; set; }
 
         public WorkShopContext(DbContextOptions options) : base(options)
         {
@@ -197,6 +198,12 @@ namespace WorkShop.Model
             modelBuilder.Entity<Inventory>()
                 .HasIndex(p => p.Tenant)
                 .HasName("idx_inventory_tenant");
+
+            // UserToken
+            modelBuilder.Entity<UserToken>()
+                .HasIndex(p => p.User)
+                    .IsUnique(true)
+                    .HasName("uq_user_token_user");
         }
     }
 }
