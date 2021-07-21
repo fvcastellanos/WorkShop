@@ -13,10 +13,6 @@ namespace WorkShop.Pages
         protected OperationTypeService OperationTypeService { get; set; }
         protected OperationTypeView OperationTypeView;
         protected IEnumerable<OperationTypeView> OperationTypes = new List<OperationTypeView>();
-        protected int TopRows;
-        protected int Active;
-        protected string Code;
-        protected string Name;
         protected SearchView searchView;
 
         protected override void OnInitialized()
@@ -36,7 +32,7 @@ namespace WorkShop.Pages
         protected void GetOperationTypes()
         {
             HideErrorMessage();
-            var result = OperationTypeService.GetOperationTypes(TopRows, Name, Active);
+            var result = OperationTypeService.GetOperationTypes(searchView.TopRows, searchView.Name, searchView.Active);
             result.Match(right => OperationTypes = right, ShowErrorMessage);            
         }
 

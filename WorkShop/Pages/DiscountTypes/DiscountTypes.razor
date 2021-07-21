@@ -5,35 +5,35 @@
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-10">
-            <h2>Discount Types</h2>
-            <p>Discount types catalog</p>
+            <h2>Tipos de Descuento</h2>
+            <p>Catálogo de Tipo de Descuentos</p>
 
             <div class="top-separator">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Search</h4>
+                        <h4 class="card-title">Búsqueda</h4>
                         <fieldset>
                             <div class="row">
                                 <div class="col">
                                     <div class="form-group">
-                                        <label for="searchName">Name</label>
-                                        <input type="text" class="form-control" id="searchName" placeholder="Name" @bind="Search.Name">
+                                        <label for="searchName">Nombre</label>
+                                        <input type="text" class="form-control" id="searchName" placeholder="Nombre" @bind="Search.Name">
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col">
                                     <div class="form-group">
-                                        <label for="searchActive">Active</label>
+                                        <label for="searchActive">Activo</label>
                                         <select class="custom-select" id="searchActive" @bind="Search.Active">
-                                            <option value="1">Y</option>
-                                            <option value="0">N</option>
+                                            <option value="1">Si</option>
+                                            <option value="0">No</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-group">
-                                        <label for="top">Rows</label>
+                                        <label for="top">Filas</label>
                                         <select class="custom-select" id="top" @bind="Search.TopRows">
                                             <option value="10">10</option>
                                             <option selected="25">25</option>
@@ -44,8 +44,8 @@
                                     </div>                            
                                 </div>
                             </div>
-                            <input type="button" class="btn btn-secondary" value="Search" @onclick="GetDiscountTypes" />
-                            <input type="button" class="btn btn-primary" value="Add Discount Type" @onclick="ShowAddModal" />
+                            <input type="button" class="btn btn-secondary" value="Búsqueda" @onclick="GetDiscountTypes" />
+                            <input type="button" class="btn btn-primary" value="Agregar Tipo de Descuento" @onclick="ShowAddModal" />
                         </fieldset>
                     </div>
                 </div>
@@ -57,17 +57,17 @@
                 <table class="table table-striped">
                     <thead>
                         <th>#</th>
-                        <th>Name</th>
-                        <th>Active</th>
+                        <th>Nombre</th>
+                        <th>Activo</th>
                     </thead>
                     <tbody>
                         @foreach (var discountType in DiscountTypes)
                         {
                             <tr>
                                 <td>
-                                    <button class="btn btn-secondary" @onclick="() => GetDiscountType(discountType.Id)" >
+                                    <div class="crud-icon" @onclick="() => GetDiscountType(discountType.Id)" >
                                         <span class="oi oi-brush" aria-hidden="true"></span>
-                                    </button>                                    
+                                    </div>                                    
                                 </td>
                                 <td>@discountType.Name</td>
                                 <td><BooleanField Value="@discountType.Active"/></td>
@@ -85,11 +85,11 @@
                             <div class="modal-header">
                                 @if (!ModifyModal)
                                 {
-                                    <h5 class="modal-title">Add Discount Type</h5>
+                                    <h5 class="modal-title">Agregar Tipo de Descuento</h5>
                                 }
                                 else
                                 {
-                                    <h5 class="modal-title">Update Discount Type</h5>
+                                    <h5 class="modal-title">Actualizar Tipo de Descuento</h5>
                                 }
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddModal">
                                     <span aria-hidden="true">&times;</span>
@@ -103,26 +103,26 @@
                                     <DataAnnotationsValidator/>
                                     <ValidationSummary/>
                                     <div class="form-group">
-                                        <label for="name">Name</label>
-                                        <input type="text" class="form-control" id="name" placeholder="Name" @bind="DiscountTypeView.Name"/>
+                                        <label for="name">Nombre</label>
+                                        <input type="text" class="form-control" id="name" placeholder="Nombre" @bind="DiscountTypeView.Name"/>
                                     </div>
                                     <div class="form-group">
-                                        <label for="description">Description</label>
+                                        <label for="description">Descripción</label>
                                         <textarea class="form-control" id="description" @bind="DiscountTypeView.Description" row="4"></textarea>
                                     </div>
                                     @if (ModifyModal)
                                     {
-                                        <label for="active">Active</label>
+                                        <label for="active">Activo</label>
                                         <div id="active" class="form-group">
                                             <select class="form-control" @bind="DiscountTypeView.Active">
-                                                <option value="0">N</option>
-                                                <option value="1">Y</option>
+                                                <option value="0">No</option>
+                                                <option value="1">Si</option>
                                             </select>
                                         </div>
                                     }
 
-                                    <input type="submit" class="btn btn-primary" value="Save" @onclick="SaveChanges" />
-                                    <input type="button" class="btn btn-secondary" value="Cancel" @onclick="HideAddModal"/>
+                                    <input type="submit" class="btn btn-primary" value="Guardar" @onclick="SaveChanges" />
+                                    <input type="button" class="btn btn-secondary" value="Cancelar" @onclick="HideAddModal"/>
                                 </EditForm>
                             </div>
                         </div>

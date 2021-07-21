@@ -1,7 +1,9 @@
 
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using LanguageExt;
 
 namespace WorkShop.Clients
 {
@@ -43,5 +45,71 @@ namespace WorkShop.Clients
             return new StringContent(payload, Encoding.UTF8, "application/json");
         }
 
+        protected IEnumerable<T> Find<T>(string token, string url, string errorMessage)
+        {
+            AddAuthenticationHeader(token);
+
+            using (var response = HttpClient.GetAsync(url).Result)
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    var responsePayload = response.Content.ReadAsStringAsync()
+                        .Result;
+
+                    return JsonDeserialize<List<T>>(responsePayload);
+                }
+            }
+
+            throw new HttpRequestException(errorMessage);            
+        }
+
+        protected Option<T> FindById<T>(string token, string url, string errorMessage)
+        {
+            AddAuthenticationHeader(token);
+
+            using (var response = HttpClient.GetAsync(url).Result)
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    var responsePayload = response.Content.ReadAsStringAsync()
+                        .Result;
+
+                    return JsonDeserialize<T>(responsePayload);
+                }
+
+                if (response.StatusCode.Equals(404))
+                {
+                    return Option<T>.None;
+                }
+            }
+
+            throw new HttpRequestException(errorMessage);
+        }
+
+        protected void Add(string token, string url, StringContent content, string errorMessage)
+        {
+            AddAuthenticationHeader(token);
+
+            using (var response = HttpClient.PostAsync(url, content).Result)
+            {
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException(errorMessage);
+                }
+            }
+        }
+
+        protected void Update(string token, string url, StringContent content, string errorMessage)
+        {
+            AddAuthenticationHeader(token);
+
+            using (var response = HttpClient.PutAsync(url, content).Result)
+            {
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException(errorMessage);
+                }
+            }
+        }
     }
 }

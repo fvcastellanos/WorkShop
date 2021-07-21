@@ -19,80 +19,32 @@ namespace WorkShop.Clients
                                           string name,
                                           int active)
         {
-            AddAuthenticationHeader(token);
-
-            // GET /restaurants?_where[0][stars]=1&_where[1][pricing_lte]=20
 
             var queryString = $"?_where[0][code_contains]={code}&_where[1][name_contains]={name}&_where[2][active]={active}&_limit={topRows}";
+            var url = $"{ProvidersResource}{queryString}";
 
-            using (var response = HttpClient.GetAsync(ProvidersResource + queryString).Result)
-            {
-                if (response.IsSuccessStatusCode)
-                {
-                    var responsePayload = response.Content.ReadAsStringAsync()
-                        .Result;
-
-                    return JsonDeserialize<List<Provider>>(responsePayload);
-                }
-            }
-
-            throw new HttpRequestException("Can't get provider list");
+            return Find<Provider>(token, url, "Can't get provider list");
         }
 
         public Option<Provider> FindById(string token, string id)
         {
-            AddAuthenticationHeader(token);
 
-            var pathParam = $"/{id}";
-
-            using (var response = HttpClient.GetAsync(ProvidersResource + pathParam).Result)
-            {
-                if (response.IsSuccessStatusCode)
-                {
-                    var responsePayload = response.Content.ReadAsStringAsync()
-                        .Result;
-
-                    return JsonDeserialize<Provider>(responsePayload);
-                }
-
-                if (response.StatusCode.Equals(404)) {
-
-                    return null;
-                }
-            }
-
-            throw new HttpRequestException($"Can't search provider with Id: {id}");
+            var url = $"{ProvidersResource}/{id}";
+            return FindById<Provider>(token, url, $"Can't search provider with Id: {id}");
         }
 
         public void Add(string token, Provider provider)
         {
-            AddAuthenticationHeader(token);
-
-            var content = CreateStringContent(provider);
-
-            using (var response = HttpClient.PostAsync(ProvidersResource, content).Result)
-            {
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new HttpRequestException("Can't add provider");
-                }
-            }
+            var content = CreateStringContent(provider);            
+            Add(token, ProvidersResource, content, $"Can't add provider: {provider.Name}");
         }
 
         public void Update(string token, Provider provider)
         {
-            AddAuthenticationHeader(token);
-
             var url = ProvidersResource + $"/{provider.Id}";
             var content = CreateStringContent(provider);
 
-            using (var response = HttpClient.PutAsync(url, content).Result)
-            {
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new HttpRequestException("Can't update provider");
-                }
-            }
+            Update(token, url, content, $"Can't update provider: {provider.Name}");
         }
     }
 }

@@ -71,7 +71,16 @@ namespace WorkShop.Pages
 
         protected override void Update()
         {
-            throw new System.NotImplementedException();
+            var result = Service.Update(DiscountTypeView);
+
+            result.Match(right => {
+                
+                HideModalError();
+                HideModal();
+                GetDiscountTypes();
+
+            }, DisplayModalError);
+
         }
 
         // -------------------------------------------------------------------

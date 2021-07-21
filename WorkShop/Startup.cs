@@ -55,6 +55,8 @@ namespace WorkShop
             services.AddScoped<LoginClient>();
             services.AddScoped<ProviderClient>();
             services.AddScoped<ProductClient>();
+            services.AddScoped<OperationTypeClient>();
+            services.AddScoped<DiscountTypeClient>();
 
             services.AddScoped<ProductService>();
             services.AddScoped<OperationTypeService>();

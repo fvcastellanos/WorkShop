@@ -4,25 +4,27 @@ using System.Linq;
 using LanguageExt;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using WorkShop.Clients;
+using WorkShop.Clients.Domain;
 using WorkShop.Domain;
-using WorkShop.Model;
+using WorkShop.Providers;
 
 namespace WorkShop.Services
 {
-    public class OperationTypeService
+    public class OperationTypeService: ServiceBase
     {
-        private const string DefaultTenant = "default";
-
         private readonly ILogger _logger;
 
-        private readonly WorkShopContext _dbContext;
+        private readonly OperationTypeClient _operationTypeClient;
 
         public OperationTypeService(ILogger<OperationTypeService> logger, 
-                                    WorkShopContext dbContext,
-                                    IHttpContextAccessor httpContextAccessor)
+                                    OperationTypeClient operationTypeClient,
+                                    TokenProvider tokenProvider,
+                                    IHttpContextAccessor httpContextAccessor): base(httpContextAccessor, tokenProvider)
         {
             _logger = logger;
-            _dbContext = dbContext;
+            _operationTypeClient = operationTypeClient;
+
         }
 
         public Option<OperationTypeView> GetById(string id)
@@ -30,13 +32,9 @@ namespace WorkShop.Services
             try
             {
                 _logger.LogInformation($"load operation type with id: {id}");
-
-                var key = Guid.Parse(id);
-
-                return _dbContext.OperationTypes
-                    .Where(ot => ot.Id.Equals(key))
-                    .Select(ToView)
-                    .FirstOrDefault();
+                
+                return _operationTypeClient.FindById(GetStrapiToken(), id)
+                    .Map(ToView);
             }
             catch (Exception exception)
             {
@@ -51,11 +49,8 @@ namespace WorkShop.Services
             {
                 _logger.LogInformation($"Get top {top} operation types");
 
-                return _dbContext.OperationTypes
-                    .Where(row => row.Active.Equals(active) 
-                        && row.Name.Contains(name))
+                return _operationTypeClient.Find(GetStrapiToken(), top, name, active)
                     .Select(ToView)
-                    .Take(top)
                     .ToList();
             }
             catch (Exception ex)
@@ -76,21 +71,17 @@ namespace WorkShop.Services
                     return $"Operation Type with name: {view.Name} already exists";
                 }
 
-                var operationType = new OperationType()
+                var operationType = new OperationType
                 {
                     Name = view.Name,
                     Description = view.Description,
-                    // Active = view.Active,
-                    Inbound = view.Inbound,
-                    Tenant = DefaultTenant
+                    Active = true,
+                    Inbound = view.Inbound.Equals(1),
                 };
 
-                _dbContext.OperationTypes.Add(operationType);
-                _dbContext.SaveChanges();
+                _operationTypeClient.Add(GetStrapiToken(), operationType);
 
                 _logger.LogInformation($"Add new operation type with name: {view.Name}");
-
-                view.Id = operationType.Id.ToString();
                 return view;
 
             }
@@ -105,26 +96,32 @@ namespace WorkShop.Services
         {
             try
             {
-                var id = Guid.Parse(view.Id);
-                var model = _dbContext.OperationTypes.Find(id);
+                var operationTypeHolder = GetById(view.Id);
+                var error = "";                
 
-                if (model == null)
+                operationTypeHolder.Match(some => {
+                    
+                    var operationType = new OperationType
+                    {
+                        Id = long.Parse(view.Id),
+                        Name = view.Name,
+                        Description = view.Description,
+                        Inbound = view.Inbound.Equals(1),
+                        Active = view.Active.Equals(1)
+                    };
+
+                    _logger.LogInformation($"Update operation type: {view.Name}");
+                    _operationTypeClient.Update(GetStrapiToken(), operationType);
+
+                }, () => error = $"Operation Type: {view.Name} not found");
+                
+                if (!String.IsNullOrEmpty(error))
                 {
-                    return $"Operation Type: {view.Name} not found";
+                    return error;
                 }
 
-                model.Name = view.Name;
-                model.Description = view.Description;
-                model.Inbound = view.Inbound;
-                // model.Active = view.Active;
-                model.Updated = DateTime.Now;
-
-                _logger.LogInformation($"Update operation type: {view.Name}");
-
-                _dbContext.OperationTypes.Update(model);
-                _dbContext.SaveChanges();
-
                 return view;
+
             }
             catch (Exception ex)
             {
@@ -139,10 +136,8 @@ namespace WorkShop.Services
         {
             try
             {
-                return _dbContext.OperationTypes
-                    .Where(ot => ot.Name.Equals(name))
-                    .Select(ToView)
-                    .FirstOrDefault();
+                return _operationTypeClient.FindByName(GetStrapiToken(), name)
+                    .Map(ToView);
             }
             catch (Exception exception)
             {
@@ -158,8 +153,8 @@ namespace WorkShop.Services
                 Id = operationType.Id.ToString(),
                 Name = operationType.Name,
                 Description = operationType.Description,
-                // Active = operationType.Active,
-                Inbound = operationType.Inbound
+                Active = operationType.Active ? 1 : 0,
+                Inbound = operationType.Inbound ? 1 : 0
             };
         }
     }

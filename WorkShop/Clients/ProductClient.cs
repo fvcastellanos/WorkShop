@@ -19,80 +19,35 @@ namespace WorkShop.Clients
                                          string name,
                                          int active)
         {
-            AddAuthenticationHeader(token);
-
             // GET /restaurants?_where[0][stars]=1&_where[1][pricing_lte]=20
 
             var queryString = $"?_where[0][code_contains]={code}&_where[1][name_contains]={name}&_where[2][active]={active}&_limit={topRows}";
             var url = $"{ProductsResource}{queryString}";
 
-            using (var response = HttpClient.GetAsync(url).Result)
-            {
-                if (response.IsSuccessStatusCode)
-                {
-                    var responsePayload = response.Content.ReadAsStringAsync()
-                        .Result;
-
-                    return JsonDeserialize<List<Product>>(responsePayload);
-                }
-            }
-
-            throw new HttpRequestException("Can't get product list");
+            return Find<Product>(token, url, "Can't get product list");
         }
 
         public Option<Product> FindById(string token, string id)
         {
-            AddAuthenticationHeader(token);
-
             var url = $"{ProductsResource}/{id}";
 
-            using (var response = HttpClient.GetAsync(url).Result)
-            {
-                if (response.IsSuccessStatusCode)
-                {
-                    var responsePayload = response.Content.ReadAsStringAsync()
-                        .Result;
-
-                    return JsonDeserialize<Product>(responsePayload);
-                }
-
-                if (response.StatusCode.Equals(404))
-                {
-                    return null;
-                }
-            }
-
-            throw new HttpRequestException($"Can't search provider with Id: {id}");
+            return FindById<Product>(token, url, $"Can't search provider with Id: {id}");
         }
 
-        public void Add(string token, Product provider)
+        public void Add(string token, Product product)
         {
-            AddAuthenticationHeader(token);
 
-            var content = CreateStringContent(provider);
-            using (var response = HttpClient.PostAsync(ProductsResource, content).Result)
-            {
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new HttpRequestException("Can't add product");
-                }
-            }
+            var content = CreateStringContent(product);
+            Add(token, ProductsResource, content, $"Can't add product: {product.Name}");
         }
 
         public void Update(string token, Product provider)
         {
-            AddAuthenticationHeader(token);
 
             var url = $"{ProductsResource}/{provider.Id}";
             var content = CreateStringContent(provider);
 
-            using (var response = HttpClient.PutAsync(url, content).Result)
-            {
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new HttpRequestException("Can't update provider");
-                }
-            }
+            Update(token, url, content, $"Can't update provider {provider.Name}");
         }
     }
 }

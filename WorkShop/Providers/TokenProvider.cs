@@ -15,6 +15,17 @@ namespace WorkShop.Providers
 
         public void StoreToken(string user, string value) {
 
+            var existingUserToken = _dbContext.UserTokens.Where(userToken => userToken.User.Equals(user))
+                .FirstOrDefault();
+
+            if (existingUserToken != null)
+            {
+                existingUserToken.Token = value;
+                _dbContext.UserTokens.Update(existingUserToken);
+                _dbContext.SaveChanges();
+                return;
+            }
+
             var userToken = new UserToken
             {
                 User = user,
