@@ -50,8 +50,11 @@ namespace WorkShop.Providers
                 .Where(ut => ut.User.Equals(user))
                 .FirstOrDefault();
 
-            _dbContext.UserTokens.Remove(userToken);
-            _dbContext.SaveChanges();
+            if (userToken != null)
+            {
+                _dbContext.UserTokens.Remove(userToken);
+                _dbContext.SaveChanges();
+            }
         }
     }
 }
