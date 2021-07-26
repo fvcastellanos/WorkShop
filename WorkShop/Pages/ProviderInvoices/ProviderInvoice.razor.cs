@@ -6,7 +6,7 @@ namespace WorkShop.Pages
     public class ProviderInvoiceBase : CrudBase
     {
         [Parameter]
-        public long ProviderId { get; set; }
+        public string ProviderId { get; set; }
         
         protected override void Add()
         {
