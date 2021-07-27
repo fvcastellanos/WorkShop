@@ -71,12 +71,13 @@
                     <tbody>
                         @foreach (var provider in Providers)
                         {
+                            var link = $"provider-invoices/{provider.Id}";
                             <tr>
                                 <td>
                                     <div @onclick="() => GetProvider(provider.Id)" class="crud-icon">
                                         <span class="oi oi-brush" aria-hidden="true"></span>
                                     </div>
-                                    <NavLink href="provider-invoices/@provider.id" class="crud-icon">
+                                    <NavLink href="@link" class="crud-icon">
                                         <span class="oi oi-calculator" aria-hidden="true"></span>
                                     </NavLink>
                                 </td>

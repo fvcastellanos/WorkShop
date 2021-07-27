@@ -2,38 +2,71 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LanguageExt;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using WorkShop.Clients;
+using WorkShop.Clients.Domain;
 using WorkShop.Domain;
-using WorkShop.Model;
+using WorkShop.Providers;
 
 namespace WorkShop.Services
 {
-    public class ProviderInvoiceService
+    public class ProviderInvoiceService: ServiceBase
     {
         private readonly ILogger _logger;
-        private readonly WorkShopContext _dbContext;
 
-        public ProviderInvoiceService(ILogger<ProviderInvoiceService> logger, WorkShopContext dbContext)
+        private readonly ProviderInvoiceClient _providerInvoiceClient;
+
+        public ProviderInvoiceService(IHttpContextAccessor httpContextAccessor, 
+                                      TokenProvider tokenProvider,
+                                      ILogger<ProviderInvoiceService> logger,
+                                      ProviderInvoiceClient providerInvoiceClient) : base(httpContextAccessor, tokenProvider)
         {
+            _providerInvoiceClient = providerInvoiceClient;
             _logger = logger;
-            _dbContext = dbContext;
         }
 
-        public Either<string, IEnumerable<ProviderInvoiceView>> GetInvoices(string code, string taxId = "", int top = 25)
+        public Either<string, IEnumerable<ProviderInvoiceView>> GetInvoices(long providerId, string number = "", int active = 1, int top = 25)
         {
             try
             {
-                return _dbContext.ProviderInvoices
-                    .Where(pi => pi.Provider.Code.Equals(code)
-                        && pi.Provider.TaxId.Contains(taxId))
-                    .Select(ToView)
-                    .Take(top)
+                return _providerInvoiceClient.Find(GetStrapiToken(), top, providerId, number, active)
+                    .Map(ToView)
                     .ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Can't get invoices for provider code: {code} - ", ex.Message);
-                return $"Can't get Invoices for provider code: {code}";
+                _logger.LogError($"Can't get invoices for provider id: {providerId} - ", ex.Message);
+                return $"Can't get Invoices for provider id: {providerId}";
+            }
+        }
+
+        public Either<string, ProviderInvoiceView> Add(long providerId, ProviderInvoiceView view)
+        {
+            try
+            {
+                var providerInvoice = new ProviderInvoice
+                {
+                    Number = view.Number,
+                    Amount = view.Amount,
+                    Suffix = view.Suffix,
+                    Description = view.Description,
+                    Created = view.Created,
+                    Active  = true,
+                    Provider = new Provider
+                    {
+                        Id = providerId
+                    }
+                };
+
+                _providerInvoiceClient.Add(GetStrapiToken(), providerInvoice);
+
+                return view;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't add invoice number {view.Number} for provider: {providerId} - ", ex.Message);
+                return $"Can't add invoice number {view.Number} for provider: {providerId}";
             }
         }
 
@@ -43,11 +76,12 @@ namespace WorkShop.Services
             {
                 Id = providerInvoice.Id.ToString(),
                 Number = providerInvoice.Number,
-                ProviderCode = providerInvoice.Provider.Code,
-                ProviderId = providerInvoice.Provider.Id.ToString(),
-                ProviderName = providerInvoice.Provider.Name,
-                ProviderTaxId = providerInvoice.Provider.TaxId,
-                ImageUrl = providerInvoice.ImageUrl
+                Suffix = providerInvoice.Suffix,
+                Active = providerInvoice.Active ? 1 : 0,
+                Description = providerInvoice.Description,
+                Amount = providerInvoice.Amount,
+                Created = providerInvoice.Created
+                // ImageUrl = providerInvoice.ImageUrl
             };
         }
     }

@@ -1,11 +1,177 @@
 @inherits ProviderInvoiceBase
 
-@page "/provider-invoices/{ProviderId}"
+@page "/provider-invoices/{ProviderId:long}"
 
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-10">
-            
+            <h2>Facturas de Proveedores</h2>
+            <p>Catálogo de facturas de proveedores</p>
+            <div class="top-separator">
+                <table class="table">
+                    <tr>
+                        <th width="30%">Proveedor</th>
+                        <td>@ProviderView.Name</td>
+                    </tr>
+                    <tr>
+                        <th>Nit</th>
+                        <td>@ProviderView.TaxId</td>
+                    </tr>
+                </table>                           
+                <NavLink href="providers">Proveedores</NavLink>
+            </div>
+
+            <div class="top-separator">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Búsqueda</h4>
+                        <fieldset>
+                            <div class="row">
+                                <div class="col-5">
+                                    <div class="form-group">
+                                        <label for="searchNumber">Número</label>
+                                        <input type="text" class="form-control" id="searchNumber" placeholder="Número" @bind="SearchView.Number">
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label for="searchYear">Año</label>
+                                        <input type="number" class="form-control" id="searchYear" placeholder="Año" @bind="SearchView.Year">
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label for="searchMonth">Mes</label>
+                                        <input type="number" class="form-control" id="searchMonth" placeholder="Mes" @bind="SearchView.Month">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label for="searchActive">Activo</label>
+                                        <select class="custom-select" id="searchActive" @bind="SearchView.Active">
+                                            <option value="1">Si</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label for="top">Filas</label>
+                                        <select class="custom-select" id="top" @bind="SearchView.TopRows">
+                                            <option value="10">10</option>
+                                            <option selected="25">25</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                            <option value="500">500</option>
+                                        </select>
+                                    </div>                            
+                                </div>
+                            </div>
+                            <input type="button" class="btn btn-secondary" value="Buscar" @onclick="FindInvoices" />
+                            <input type="button" class="btn btn-primary" value="Agregar Factura" @onclick="ShowAddModal" />
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-10 top-separator">
+
+            <ErrorMessage Display="@DisplayErrorMessage" Message="@ErrorMessage" />
+            <div class="top-separator">
+                <table class="table table-striped">
+                    <thead>
+                        <th>#</th>
+                        <th>Fecha</th>
+                        <th>Número</th>
+                        <th>Monto</th>
+                        <th>Activo</th>
+                    </thead>
+                    <tbody>
+                        @foreach (var providerInvoice in ProviderInvoices)
+                        {
+                            <tr>
+                                <td>
+                                    <div @onclick="() => GetInvoice(providerInvoice.Id)" class="crud-icon">
+                                        <span class="oi oi-brush" aria-hidden="true"></span>
+                                    </div>
+                                </td>
+                                <td>@providerInvoice.Created.ToShortDateString()</td>
+                                <td>@providerInvoice.Number</td>
+                                <td>@providerInvoice.Amount</td>
+                                <td><BooleanField Value="@providerInvoice.Active"/></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (DisplayModal)
+            {
+                <div class="modal" tabindex="-1" role="dialog" style="display: block">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                @if (!ModifyModal)
+                                {
+                                    <h5 class="modal-title">Agregar Factura</h5>
+                                }
+                                else 
+                                {
+                                    <h5 class="modal-title">Actualizar Factura</h5>
+                                }
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddModal">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+
+                                <ErrorMessage Display="@HasModalError" Message="@ModalErrorMessage" />
+
+                                <EditForm EditContext="@EditContext" OnValidSubmit="@SaveChanges">
+                                    <DataAnnotationsValidator/>
+                                    <ValidationSummary/>
+                                    <div class="form-group">
+                                        <label for="code">Sufijo</label>
+                                        <input type="text" class="form-control" id="suffix" placeholder="Sufijo" @bind="ProviderInvoiceView.Suffix"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="name">Número</label>
+                                        <input type="text" class="form-control" id="number" placeholder="Número" @bind="ProviderInvoiceView.Number"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="taxId">Fecha</label>
+                                        <input type="date" class="form-control" id="date" placeholder="Fecha" @bind="ProviderInvoiceView.Created"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contact">Monto</label>
+                                        <input type="number" class="form-control" id="amount" placeholder="Monto" @bind="ProviderInvoiceView.Amount"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="description">Descripción</label>
+                                        <textarea class="form-control" id="description" @bind="ProviderInvoiceView.Description" row="4"></textarea>
+                                    </div>
+                                    @if (ModifyModal)
+                                    {
+                                        <label for="active">Activo</label>
+                                        <div id="active" class="form-group">
+                                            <select class="form-control" @bind="ProviderInvoiceView.Active">
+                                                <option value="0">No</option>
+                                                <option value="1">Si</option>
+                                            </select>
+                                        </div>
+                                    }
+
+                                    <input type="submit" class="btn btn-primary" value="Guardar" @onclick="SaveChanges" />
+                                    <input type="button" class="btn btn-secondary" value="Cancelar" @onclick="HideAddModal"/>
+                                </EditForm>
+                            </div>
+                        </div>
+                    </div>
+                </div>    
+            }
         </div>
     </div>
 </div>
