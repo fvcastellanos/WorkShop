@@ -41,6 +41,20 @@ namespace WorkShop.Services
             }
         }
 
+        public Option<ProviderInvoiceView> GetInvoice(string invoiceId)
+        {
+            try
+            {
+                 return _providerInvoiceClient.FindById(GetStrapiToken(), invoiceId)
+                    .Map(ToView);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't get invoice with id: {invoiceId} - ", ex.Message);
+                return null;
+            }
+        }
+
         public Either<string, ProviderInvoiceView> Add(long providerId, ProviderInvoiceView view)
         {
             try

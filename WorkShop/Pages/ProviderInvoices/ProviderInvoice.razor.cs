@@ -88,7 +88,9 @@ namespace WorkShop.Pages
 
         protected void GetInvoice(string id)
         {
+            var holder = ProviderInvoiceService.GetInvoice(id);
 
+            holder.Match(ShowEditModal, () => ShowErrorMessage($"Can't find invoice with Id: {id}"));
         }
 
         // -----------------------------------------------------------------------------------------------
@@ -106,5 +108,14 @@ namespace WorkShop.Pages
 
             }, () => ShowErrorMessage("Can't get Provider information"));
         }
+
+        private void ShowEditModal(ProviderInvoiceView view)
+        {
+            ProviderInvoiceView = view;
+            EditContext = new EditContext(ProviderInvoiceView);
+
+            ShowEditModal();
+        }
+
     }
 }
