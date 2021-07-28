@@ -70,7 +70,13 @@ namespace WorkShop.Pages
 
         protected override void Update()
         {
-            throw new System.NotImplementedException();
+            var result = ProviderInvoiceService.Update(ProviderId, ProviderInvoiceView);
+
+            result.Match(right => {
+
+                HideModal();
+                FindInvoices();
+            }, DisplayModalError);
         }
 
         protected void FindInvoices()

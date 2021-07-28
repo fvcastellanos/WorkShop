@@ -47,5 +47,12 @@ namespace WorkShop.Clients
             var content = CreateStringContent(providerInvoice);
             Add(token, ProviderInvoiceResource, content, $"Can't add invoice for provider: {providerInvoice.Number}");
         }
+
+        public void Update(string token, ProviderInvoice providerInvoice)
+        {
+            var content = CreateStringContent(providerInvoice);
+            var url = $"{ProviderInvoiceResource}/{providerInvoice.Id}";
+            Update(token, url, content, $"Can't update invoice: {providerInvoice.Number}");
+        }
     }
 }

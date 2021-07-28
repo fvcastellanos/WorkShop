@@ -59,6 +59,11 @@ namespace WorkShop.Services
         {
             try
             {
+                if (InvoiceExists(providerId, view.Suffix, view.Number))
+                {
+                    return $"Invoice: {view.Number} already exists for Provider: {providerId}";
+                }
+
                 var providerInvoice = new ProviderInvoice
                 {
                     Number = view.Number,
@@ -84,6 +89,49 @@ namespace WorkShop.Services
             }
         }
 
+        public Either<string, ProviderInvoiceView> Update(long providerId, ProviderInvoiceView view)
+        {
+            try
+            {
+                var token = GetStrapiToken();
+                var holder = _providerInvoiceClient.FindById(token, view.Id);
+                var error = "";
+
+                holder.Match(some => {
+
+                    var provider = new ProviderInvoice
+                    {
+                        Id = long.Parse(view.Id),
+                        Suffix = view.Suffix,
+                        Number = view.Number,
+                        Created = view.Created,
+                        Amount = view.Amount,
+                        Description = view.Description,
+                        Active = view.Active.Equals(1),
+                        Provider = new Provider
+                        {
+                            Id = providerId
+                        }
+                    };
+
+                    _providerInvoiceClient.Update(token, provider);
+
+                }, () => error = $"Invoice: {view.Number} not found");
+
+                if (string.IsNullOrEmpty(error))
+                {
+                    return view;
+                }
+
+                return error;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't update invoice number: {view.Number} for provider: {providerId} - ", ex.Message);
+                return $"Can't update invoice number: {view.Number} for provider: {providerId}";
+            }
+        }
+
         private ProviderInvoiceView ToView(ProviderInvoice providerInvoice)
         {
             return new ProviderInvoiceView()
@@ -97,6 +145,16 @@ namespace WorkShop.Services
                 Created = providerInvoice.Created
                 // ImageUrl = providerInvoice.ImageUrl
             };
+        }
+
+
+
+        private bool InvoiceExists(long providerId, string suffix, string number)
+        {
+
+            var holder = _providerInvoiceClient.FindByNumber(GetStrapiToken(), providerId, suffix, number);
+            
+            return holder.IsSome;
         }
     }
 }
