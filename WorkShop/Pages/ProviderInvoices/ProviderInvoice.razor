@@ -1,12 +1,25 @@
-@inherits ProviderBase;
+@inherits ProviderInvoiceBase
 
-@page "/providers"
+@page "/provider-invoices/{ProviderId:long}"
 
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-10">
-            <h2>Proveedores</h2>
-            <p>Catálogo de proveedores</p>
+            <h2>Facturas de Proveedores</h2>
+            <p>Catálogo de facturas de proveedores</p>
+            <div class="top-separator">
+                <table class="table">
+                    <tr>
+                        <th width="30%">Proveedor</th>
+                        <td>@ProviderView.Name</td>
+                    </tr>
+                    <tr>
+                        <th>Nit</th>
+                        <td>@ProviderView.TaxId</td>
+                    </tr>
+                </table>                           
+                <NavLink href="providers">Proveedores</NavLink>
+            </div>
 
             <div class="top-separator">
                 <div class="card">
@@ -16,14 +29,20 @@
                             <div class="row">
                                 <div class="col-5">
                                     <div class="form-group">
-                                        <label for="searchCode">Código</label>
-                                        <input type="text" class="form-control" id="searchCode" placeholder="Código" @bind="SearchView.Code">
+                                        <label for="searchNumber">Número</label>
+                                        <input type="text" class="form-control" id="searchNumber" placeholder="Número" @bind="SearchView.Number">
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-group">
-                                        <label for="searchName">Nombre</label>
-                                        <input type="text" class="form-control" id="searchName" placeholder="Nombre" @bind="SearchView.Name">
+                                        <label for="searchYear">Año</label>
+                                        <input type="number" class="form-control" id="searchYear" placeholder="Año" @bind="SearchView.Year">
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label for="searchMonth">Mes</label>
+                                        <input type="number" class="form-control" id="searchMonth" placeholder="Mes" @bind="SearchView.Month">
                                     </div>
                                 </div>
                             </div>
@@ -50,41 +69,39 @@
                                     </div>                            
                                 </div>
                             </div>
-                            <input type="button" class="btn btn-secondary" value="Buscar" @onclick="GetProviders" />
-                            <input type="button" class="btn btn-primary" value="Agregar Proveedor" @onclick="ShowAddModal" />
+                            <input type="button" class="btn btn-secondary" value="Buscar" @onclick="FindInvoices" />
+                            <input type="button" class="btn btn-primary" value="Agregar Factura" @onclick="ShowAddModal" />
                         </fieldset>
                     </div>
                 </div>
-
             </div>
+        </div>
+
+        <div class="col-10 top-separator">
 
             <ErrorMessage Display="@DisplayErrorMessage" Message="@ErrorMessage" />
             <div class="top-separator">
                 <table class="table table-striped">
                     <thead>
                         <th>#</th>
-                        <th>Código</th>
-                        <th>Nombre</th>
-                        <th>Nit</th>
+                        <th>Fecha</th>
+                        <th>Número</th>
+                        <th>Monto</th>
                         <th>Activo</th>
                     </thead>
                     <tbody>
-                        @foreach (var provider in Providers)
+                        @foreach (var providerInvoice in ProviderInvoices)
                         {
-                            var link = $"provider-invoices/{provider.Id}";
                             <tr>
                                 <td>
-                                    <div @onclick="() => GetProvider(provider.Id)" class="crud-icon">
+                                    <div @onclick="() => GetInvoice(providerInvoice.Id)" class="crud-icon">
                                         <span class="oi oi-brush" aria-hidden="true"></span>
                                     </div>
-                                    <NavLink href="@link" class="crud-icon">
-                                        <span class="oi oi-calculator" aria-hidden="true"></span>
-                                    </NavLink>
                                 </td>
-                                <td>@provider.Code</td>
-                                <td>@provider.Name</td>
-                                <td>@provider.TaxId</td>
-                                <td><BooleanField Value="@provider.Active"/></td>
+                                <td>@providerInvoice.Created.ToShortDateString()</td>
+                                <td>@providerInvoice.Number</td>
+                                <td>@providerInvoice.Amount</td>
+                                <td><BooleanField Value="@providerInvoice.Active"/></td>
                             </tr>
                         }
                     </tbody>
@@ -99,11 +116,11 @@
                             <div class="modal-header">
                                 @if (!ModifyModal)
                                 {
-                                    <h5 class="modal-title">Agregar Proveedor</h5>
+                                    <h5 class="modal-title">Agregar Factura</h5>
                                 }
                                 else 
                                 {
-                                    <h5 class="modal-title">Actualizar Proveedor</h5>
+                                    <h5 class="modal-title">Actualizar Factura</h5>
                                 }
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAddModal">
                                     <span aria-hidden="true">&times;</span>
@@ -117,30 +134,30 @@
                                     <DataAnnotationsValidator/>
                                     <ValidationSummary/>
                                     <div class="form-group">
-                                        <label for="code">Código</label>
-                                        <input type="text" class="form-control" id="code" placeholder="Código" @bind="ProviderView.Code"/>
+                                        <label for="code">Sufijo</label>
+                                        <input type="text" class="form-control" id="suffix" placeholder="Sufijo" @bind="ProviderInvoiceView.Suffix"/>
                                     </div>
                                     <div class="form-group">
-                                        <label for="name">Nombre</label>
-                                        <input type="text" class="form-control" id="name" placeholder="Nombre" @bind="ProviderView.Name"/>
+                                        <label for="name">Número</label>
+                                        <input type="text" class="form-control" id="number" placeholder="Número" @bind="ProviderInvoiceView.Number"/>
                                     </div>
                                     <div class="form-group">
-                                        <label for="taxId">Nit</label>
-                                        <input type="text" class="form-control" id="taxId" placeholder="Nit" @bind="ProviderView.TaxId"/>
+                                        <label for="taxId">Fecha</label>
+                                        <input type="date" class="form-control" id="date" placeholder="Fecha" @bind="ProviderInvoiceView.Created"/>
                                     </div>
                                     <div class="form-group">
-                                        <label for="contact">Contacto</label>
-                                        <input type="text" class="form-control" id="contact" placeholder="Contacto" @bind="ProviderView.Contact"/>
+                                        <label for="contact">Monto</label>
+                                        <input type="number" step=".01" class="form-control" id="amount" placeholder="Monto" @bind="ProviderInvoiceView.Amount"/>
                                     </div>
                                     <div class="form-group">
                                         <label for="description">Descripción</label>
-                                        <textarea class="form-control" id="description" @bind="ProviderView.Description" row="4"></textarea>
+                                        <textarea class="form-control" id="description" @bind="ProviderInvoiceView.Description" row="4"></textarea>
                                     </div>
                                     @if (ModifyModal)
                                     {
                                         <label for="active">Activo</label>
                                         <div id="active" class="form-group">
-                                            <select class="form-control" @bind="ProviderView.Active">
+                                            <select class="form-control" @bind="ProviderInvoiceView.Active">
                                                 <option value="0">No</option>
                                                 <option value="1">Si</option>
                                             </select>
@@ -155,7 +172,6 @@
                     </div>
                 </div>    
             }
-
         </div>
     </div>
 </div>
