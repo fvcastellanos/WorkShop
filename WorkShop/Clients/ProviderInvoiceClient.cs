@@ -16,20 +16,21 @@ namespace WorkShop.Clients
         public IEnumerable<ProviderInvoice> Find(string token, 
                                                  int topRows,
                                                  long providerId,
+                                                 string serial,
                                                  string number,
                                                  int active)
         {
             // var queryString = $"?_where[0][code_contains]={code}&_where[1][name_contains]={name}&_where[2][active]={active}&_limit={topRows}";
-            var queryString = $"?_where[0][provider.id]={providerId}&_where[1][number_contains]={number}&_where[2][active]={active}&_limit={topRows}";
+            // var queryString = $"?_where[0][provider.id]={providerId}&_where[1][number_contains]={number}&_where[2][active]={active}&_limit={topRows}";
+            var queryString = $"?_where[0][provider.id]={providerId}&_where[1][serial_contains]={serial}&_where[2][number_contains]={number}&_where[3][active]={active}&_limit={topRows}";
             var url = $"{ProviderInvoiceResource}{queryString}";
 
             return Find<ProviderInvoice>(token, url, "Can't get invoice list");            
         }
 
-        public Option<ProviderInvoice> FindByNumber(string token, long providerId, string suffix, string number)
+        public Option<ProviderInvoice> FindByNumber(string token, long providerId, string serial, string number)
         {
-            var queryString = string.IsNullOrEmpty(suffix) ? $"?_where[0][provider.id]={providerId}&_where[1][number]={number}" :
-                $"?_where[0][provider.id]={providerId}&_where[1][number]={number}&_where[2][suffix]={suffix}";
+            var queryString = $"?_where[0][provider.id]={providerId}&_where[1][number]={number}&_where[2][serial]={serial}";
 
             var url = $"{ProviderInvoiceResource}{queryString}";
             return Find<ProviderInvoice>(token, url, "Can't get invoice")

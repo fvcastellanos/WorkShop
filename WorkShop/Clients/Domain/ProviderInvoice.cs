@@ -14,8 +14,8 @@ namespace WorkShop.Clients.Domain
         [JsonPropertyName("created")]
         public DateTime Created { get; set; }
 
-        [JsonPropertyName("suffix")]
-        public string Suffix { get; set; }
+        [JsonPropertyName("serial")]
+        public string Serial { get; set; }
 
         [JsonPropertyName("number")]
         public string Number { get; set; }

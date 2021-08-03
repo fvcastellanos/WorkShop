@@ -32,6 +32,7 @@ namespace WorkShop.Pages
             {
                 TopRows = 25,
                 Active = 1,
+                Serial = "",
                 Number = "",
                 Year = DateTime.Now.Year,
                 Month = DateTime.Now.Month
@@ -83,7 +84,7 @@ namespace WorkShop.Pages
         {
             ProviderInvoices = new List<ProviderInvoiceView>();
 
-            var result = ProviderInvoiceService.GetInvoices(ProviderId, SearchView.Number, SearchView.Active);
+            var result = ProviderInvoiceService.GetInvoices(ProviderId, SearchView.Serial, SearchView.Number, SearchView.Active);
 
             result.Match(right => {
 

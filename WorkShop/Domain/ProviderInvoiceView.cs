@@ -11,8 +11,8 @@ namespace WorkShop.Domain
         public string ProviderCode { get; set; }
         public string ProviderTaxId { get; set; }
 
-        [MaxLength(20)]
-        public string Suffix { get; set; }
+        [MaxLength(50)]
+        public string Serial { get; set; }
 
         [Required]
         [MaxLength(150)]

@@ -26,11 +26,15 @@ namespace WorkShop.Services
             _logger = logger;
         }
 
-        public Either<string, IEnumerable<ProviderInvoiceView>> GetInvoices(long providerId, string number = "", int active = 1, int top = 25)
+        public Either<string, IEnumerable<ProviderInvoiceView>> GetInvoices(long providerId, 
+                                                                            string serial = "",
+                                                                            string number = "", 
+                                                                            int active = 1, 
+                                                                            int top = 25)
         {
             try
             {
-                return _providerInvoiceClient.Find(GetStrapiToken(), top, providerId, number, active)
+                return _providerInvoiceClient.Find(GetStrapiToken(), top, providerId, serial, number, active)
                     .Map(ToView)
                     .ToList();
             }
@@ -59,7 +63,7 @@ namespace WorkShop.Services
         {
             try
             {
-                if (InvoiceExists(providerId, view.Suffix, view.Number))
+                if (InvoiceExists(providerId, view.Serial, view.Number))
                 {
                     return $"Invoice: {view.Number} already exists for Provider: {providerId}";
                 }
@@ -68,7 +72,7 @@ namespace WorkShop.Services
                 {
                     Number = view.Number,
                     Amount = view.Amount,
-                    Suffix = view.Suffix,
+                    Serial = view.Serial,
                     Description = view.Description,
                     Created = view.Created,
                     Active  = true,
@@ -102,7 +106,7 @@ namespace WorkShop.Services
                     var provider = new ProviderInvoice
                     {
                         Id = long.Parse(view.Id),
-                        Suffix = view.Suffix,
+                        Serial = view.Serial,
                         Number = view.Number,
                         Created = view.Created,
                         Amount = view.Amount,
@@ -138,7 +142,7 @@ namespace WorkShop.Services
             {
                 Id = providerInvoice.Id.ToString(),
                 Number = providerInvoice.Number,
-                Suffix = providerInvoice.Suffix,
+                Serial = providerInvoice.Serial,
                 Active = providerInvoice.Active ? 1 : 0,
                 Description = providerInvoice.Description,
                 Amount = providerInvoice.Amount,
