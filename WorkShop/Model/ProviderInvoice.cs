@@ -15,15 +15,19 @@ namespace WorkShop.Model
         public Provider Provider { get; set; }
 
         [Required]
-        [Column("suffix", TypeName = "varchar(30)")]
-        public string Suffix { get; set; }
+        [Column("serial", TypeName = "varchar(50)")]
+        public string Serial { get; set; }
 
         [Required]
         [Column("number", TypeName = "varchar(100)")]
         public string Number { get; set; }
+        
 
         [Column("image_url", TypeName = "varchar(250)")]
         public string ImageUrl { get; set; }
+
+        [Column("active")]
+        public int Active { get; set; }
 
         [Column("created", TypeName = "timestamp")]
         public DateTime Created { get; set; }

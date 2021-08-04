@@ -5,8 +5,9 @@ using LanguageExt;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using WorkShop.Clients;
-using WorkShop.Clients.Domain;
+// using WorkShop.Clients.Domain;
 using WorkShop.Domain;
+using WorkShop.Model;
 using WorkShop.Providers;
 
 namespace WorkShop.Services
@@ -15,18 +16,22 @@ namespace WorkShop.Services
     {
         private readonly ILogger _logger;
 
+        private readonly WorkShopContext _dbContext;
+
         private readonly ProviderInvoiceClient _providerInvoiceClient;
 
         public ProviderInvoiceService(IHttpContextAccessor httpContextAccessor, 
                                       TokenProvider tokenProvider,
                                       ILogger<ProviderInvoiceService> logger,
+                                      WorkShopContext workShopContext,
                                       ProviderInvoiceClient providerInvoiceClient) : base(httpContextAccessor, tokenProvider)
         {
             _providerInvoiceClient = providerInvoiceClient;
             _logger = logger;
+            _dbContext = workShopContext;
         }
 
-        public Either<string, IEnumerable<ProviderInvoiceView>> GetInvoices(long providerId, 
+        public Either<string, IEnumerable<ProviderInvoiceView>> GetInvoices(string providerId, 
                                                                             string serial = "",
                                                                             string number = "", 
                                                                             int active = 1, 
@@ -34,8 +39,11 @@ namespace WorkShop.Services
         {
             try
             {
-                return _providerInvoiceClient.Find(GetStrapiToken(), top, providerId, serial, number, active)
-                    .Map(ToView)
+                return _dbContext.ProviderInvoices.Where(invoice => invoice.Active.Equals(active) 
+                    && invoice.Provider.Id.Equals(Guid.Parse(providerId))
+                    && invoice.Serial.Contains(serial) && invoice.Number.Contains(number))
+                    .Take(top)
+                    .Select(ToView)
                     .ToList();
             }
             catch (Exception ex)
@@ -49,8 +57,9 @@ namespace WorkShop.Services
         {
             try
             {
-                 return _providerInvoiceClient.FindById(GetStrapiToken(), invoiceId)
-                    .Map(ToView);
+                return _dbContext.ProviderInvoices.Where(invoice => invoice.Id.Equals(Guid.Parse(invoiceId)))
+                    .Map(ToView)
+                    .FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -59,7 +68,7 @@ namespace WorkShop.Services
             }
         }
 
-        public Either<string, ProviderInvoiceView> Add(long providerId, ProviderInvoiceView view)
+        public Either<string, ProviderInvoiceView> Add(string providerId, ProviderInvoiceView view)
         {
             try
             {
@@ -153,12 +162,16 @@ namespace WorkShop.Services
 
 
 
-        private bool InvoiceExists(long providerId, string suffix, string number)
+        private bool InvoiceExists(string providerId, string serial, string number)
         {
+            var invoice = _dbContext.ProviderInvoices.Where(invoice => invoice.Provider.Id.Equals(Guid.Parse(providerId)) 
+                && invoice.Serial.Equals(serial) && invoice.Number.Equals(number))
+                .FirstOrDefault();
 
-            var holder = _providerInvoiceClient.FindByNumber(GetStrapiToken(), providerId, suffix, number);
+            return invoice == null;
+            // var holder = _providerInvoiceClient.FindByNumber(GetStrapiToken(), providerId, suffix, number);
             
-            return holder.IsSome;
+            // return holder.IsSome;
         }
     }
 }

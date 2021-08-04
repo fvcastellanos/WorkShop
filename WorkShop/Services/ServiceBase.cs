@@ -7,7 +7,7 @@ namespace WorkShop.Services
 {
     public abstract class ServiceBase
     {
-        public const string DefaultTenant = "foo";
+        public const string DefaultTenant = "defaultTenant";
         private readonly HttpContext _httpContext;
         private readonly TokenProvider _tokenProvider;
 

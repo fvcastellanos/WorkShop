@@ -42,8 +42,7 @@ namespace WorkShop
 
             services.AddHttpClient("strapi", options => {
 
-                // options.BaseAddress = new Uri(Configuration["Strapi.Client.Url"]);
-                options.BaseAddress = new Uri("http://localhost:1337");
+                options.BaseAddress = new Uri(Configuration["Strapi:Client:Url"]);
             });
 
             services.AddMemoryCache();

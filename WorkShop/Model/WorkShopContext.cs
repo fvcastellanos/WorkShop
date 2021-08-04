@@ -151,8 +151,12 @@ namespace WorkShop.Model
 
             // Provider Invoice
             modelBuilder.Entity<ProviderInvoice>()
-                .HasIndex(p => new { p.Suffix, p.Number })
+                .HasIndex(p => new { p.Serial, p.Number })
                 .HasName("idx_provider_invoice_number");
+
+            modelBuilder.Entity<ProviderInvoice>()
+                .HasIndex(p => p.Active)
+                .HasName("idx_provider_invoice_active");
 
             modelBuilder.Entity<ProviderInvoice>()
                 .Property(p => p.Created)

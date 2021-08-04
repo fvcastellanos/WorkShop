@@ -103,7 +103,7 @@ namespace WorkShop.Pages
         // -----------------------------------------------------------------------------------------------
         private void FindParentProvider(long id)
         {
-            var providerHolder = ProviderService.FindById(id.ToString());
+            var providerHolder = ProviderService.FindByCode(id.ToString());
 
             providerHolder.Match(provider => {
 
