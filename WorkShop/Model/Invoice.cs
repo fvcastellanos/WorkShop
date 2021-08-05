@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WorkShop.Model
 {
-    [Table("provider_invoice")]
-    public class ProviderInvoice
+    [Table("invoice")]
+    public class Invoice
     {
         [Key]
         [Column("id", TypeName = "varchar(50)")]
@@ -22,9 +22,19 @@ namespace WorkShop.Model
         [Column("number", TypeName = "varchar(100)")]
         public string Number { get; set; }
         
+        [Required]
+        [Column("kind", TypeName = "varchar(50)")]
+        public string Kind { get; set; }
+
+        [Required]
+        [Column("type", TypeName = "varchar(50)")]
+        public string Type { get; set; }
 
         [Column("image_url", TypeName = "varchar(250)")]
         public string ImageUrl { get; set; }
+
+        [Column("due_date", TypeName = "timestamp")]
+        public DateTime DueDate { get; set; }
 
         [Column("active")]
         public int Active { get; set; }

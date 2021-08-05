@@ -1,6 +1,4 @@
 using System;
-using Blazored.LocalStorage;
-using Blazored.SessionStorage;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,7 +28,9 @@ namespace WorkShop
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAllActuators(Configuration);
+
             services.AddDbContext<WorkShopContext>(options => options.UseMySql(Configuration));
+
             services.AddControllers();
             services.AddRazorPages();
             services.AddServerSideBlazor();
@@ -45,11 +45,7 @@ namespace WorkShop
                 options.BaseAddress = new Uri(Configuration["Strapi:Client:Url"]);
             });
 
-            services.AddMemoryCache();
             services.AddScoped<TokenProvider>();
-
-            services.AddBlazoredSessionStorage();
-            services.AddBlazoredLocalStorage();
 
             services.AddScoped<LoginClient>();
             services.AddScoped<ProviderClient>();

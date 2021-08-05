@@ -59,14 +59,14 @@ namespace WorkShop.Pages
 
         protected override void Add()
         {
-            var result = ProviderInvoiceService.Add(ProviderId, ProviderInvoiceView);
+            // var result = ProviderInvoiceService.Add(ProviderId, ProviderInvoiceView);
 
-            result.Match(right => {
+            // result.Match(right => {
 
-                HideAddModal();
-                FindInvoices();
+            //     HideAddModal();
+            //     FindInvoices();
 
-            }, DisplayModalError);
+            // }, DisplayModalError);
         }
 
         protected override void Update()
@@ -82,15 +82,15 @@ namespace WorkShop.Pages
 
         protected void FindInvoices()
         {
-            ProviderInvoices = new List<ProviderInvoiceView>();
+            // ProviderInvoices = new List<ProviderInvoiceView>();
 
-            var result = ProviderInvoiceService.GetInvoices(ProviderId, SearchView.Serial, SearchView.Number, SearchView.Active);
+            // var result = ProviderInvoiceService.GetInvoices(ProviderId, SearchView.Serial, SearchView.Number, SearchView.Active);
 
-            result.Match(right => {
+            // result.Match(right => {
 
-                ProviderInvoices = right;
+            //     ProviderInvoices = right;
 
-            }, ShowErrorMessage);
+            // }, ShowErrorMessage);
         }
 
         protected void GetInvoice(string id)

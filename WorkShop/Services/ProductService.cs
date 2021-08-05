@@ -4,9 +4,6 @@ using System.Collections.Generic;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using WorkShop.Domain;
-using WorkShop.Clients;
-using WorkShop.Providers;
-using Microsoft.AspNetCore.Http;
 using WorkShop.Model;
 
 namespace WorkShop.Services
@@ -15,19 +12,13 @@ namespace WorkShop.Services
     {
         private readonly ILogger _logger;
 
-        private readonly ProductClient _productClient;
-
         private readonly WorkShopContext _dbContext;
 
         public ProductService(ILogger<ProductService> logger, 
-                              WorkShopContext workShopContext,
-                              ProductClient productClient,
-                              IHttpContextAccessor httpContextAccessor,
-                              TokenProvider tokenProvider): base(httpContextAccessor, tokenProvider)
+                              WorkShopContext workShopContext)
         {
             _logger = logger;
             _dbContext = workShopContext;
-            _productClient = productClient;
         }
 
         public Either<string, IEnumerable<ProductView>> GetProducts(int top = 25, string code = "", string name = "", int active = 1)
@@ -41,6 +32,7 @@ namespace WorkShop.Services
                     .Take(top)
                     .Select(ToView)
                     .ToList();
+
             }
             catch (Exception ex)
             {
@@ -53,28 +45,27 @@ namespace WorkShop.Services
         {
             try
             {
-                var productHolder = FindById(productView.Code);
+                var existingProduct = _dbContext.Products.FirstOrDefault(product => 
+                    product.Code.Equals(productView.Code, StringComparison.CurrentCultureIgnoreCase));
 
-                if (productHolder.IsSome) {
+                if (existingProduct != null) {
 
                     return $"Code {productView.Code} already exists";
                 }
 
                 var product = new Product()
                 {
-                        Code = productView.Code,
-                        Name = productView.Name,
-                        Description = productView.Description,
-                        MinimalAmount = productView.MinimalAmount,
-                        Created = DateTime.Now,
-                        Tenant = DefaultTenant,
-                        Active = 1
+                    Code = productView.Code,
+                    Name = productView.Name,
+                    Description = productView.Description,
+                    MinimalAmount = productView.MinimalAmount,
+                    Created = DateTime.Now,
+                    Tenant = DefaultTenant,
+                    Active = 1
                 };
 
                 _dbContext.Products.Add(product);
                 _dbContext.SaveChanges();
-
-                productView.Id = product.Id.ToString();
 
                 return productView;
             }
@@ -88,7 +79,7 @@ namespace WorkShop.Services
         public Either<string, ProductView> Update(ProductView productView)
         {
             try
-            {                
+            {  
                 var product = _dbContext.Products.Find(Guid.Parse(productView.Id));
 
                 if (product == null)
@@ -105,6 +96,7 @@ namespace WorkShop.Services
 
                 _dbContext.Products.Update(product);
                 _dbContext.SaveChanges();
+
                 return productView;
             }
             catch (Exception ex)

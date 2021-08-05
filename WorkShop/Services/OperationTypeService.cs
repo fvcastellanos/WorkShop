@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LanguageExt;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using WorkShop.Clients;
 using WorkShop.Domain;
 using WorkShop.Model;
-using WorkShop.Providers;
 
 namespace WorkShop.Services
 {
@@ -15,20 +12,13 @@ namespace WorkShop.Services
     {
         private readonly ILogger _logger;
 
-        private readonly OperationTypeClient _operationTypeClient;
-
         private readonly WorkShopContext _dbContext;
 
         public OperationTypeService(ILogger<OperationTypeService> logger, 
-                                    WorkShopContext workShopContext,
-                                    OperationTypeClient operationTypeClient,
-                                    TokenProvider tokenProvider,
-                                    IHttpContextAccessor httpContextAccessor): base(httpContextAccessor, tokenProvider)
+                                    WorkShopContext workShopContext)
         {
             _logger = logger;
             _dbContext = workShopContext;
-            _operationTypeClient = operationTypeClient;
-
         }
 
         public Option<OperationTypeView> GetById(string id)
@@ -110,7 +100,6 @@ namespace WorkShop.Services
         {
             try
             {
-
                 var operationType = _dbContext.OperationTypes.Find(Guid.Parse(view.Id));
 
                 if (operationType == null)
@@ -119,12 +108,12 @@ namespace WorkShop.Services
                 }
 
                 operationType.Name = view.Name;
-                operationType.Description = view.Name;
+                operationType.Description = view.Description;
                 operationType.Inbound = view.Inbound;
                 operationType.Active = view.Active;
                 operationType.Updated = DateTime.Now;
 
-                _dbContext.Update(operationType);
+                _dbContext.OperationTypes.Update(operationType);
                 _dbContext.SaveChanges();
 
                 return view;
@@ -143,7 +132,8 @@ namespace WorkShop.Services
         {
             try
             {
-                return _dbContext.OperationTypes.Where(operationType => operationType.Name.Equals(name))
+                return _dbContext.OperationTypes.Where(operationType => 
+                    operationType.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase))
                     .Select(ToView)
                     .FirstOrDefault();
             }

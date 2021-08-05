@@ -2,13 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LanguageExt;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using WorkShop.Clients;
-// using WorkShop.Clients.Domain;
 using WorkShop.Domain;
 using WorkShop.Model;
-using WorkShop.Providers;
 
 namespace WorkShop.Services
 {
@@ -18,15 +14,9 @@ namespace WorkShop.Services
 
         private readonly WorkShopContext _dbContext;
 
-        private readonly ProviderInvoiceClient _providerInvoiceClient;
-
-        public ProviderInvoiceService(IHttpContextAccessor httpContextAccessor, 
-                                      TokenProvider tokenProvider,
-                                      ILogger<ProviderInvoiceService> logger,
-                                      WorkShopContext workShopContext,
-                                      ProviderInvoiceClient providerInvoiceClient) : base(httpContextAccessor, tokenProvider)
+        public ProviderInvoiceService(ILogger<ProviderInvoiceService> logger,
+                                      WorkShopContext workShopContext)
         {
-            _providerInvoiceClient = providerInvoiceClient;
             _logger = logger;
             _dbContext = workShopContext;
         }
@@ -39,7 +29,7 @@ namespace WorkShop.Services
         {
             try
             {
-                return _dbContext.ProviderInvoices.Where(invoice => invoice.Active.Equals(active) 
+                return _dbContext.Invoices.Where(invoice => invoice.Active.Equals(active) 
                     && invoice.Provider.Id.Equals(Guid.Parse(providerId))
                     && invoice.Serial.Contains(serial) && invoice.Number.Contains(number))
                     .Take(top)
@@ -57,7 +47,7 @@ namespace WorkShop.Services
         {
             try
             {
-                return _dbContext.ProviderInvoices.Where(invoice => invoice.Id.Equals(Guid.Parse(invoiceId)))
+                return _dbContext.Invoices.Where(invoice => invoice.Id.Equals(Guid.Parse(invoiceId)))
                     .Map(ToView)
                     .FirstOrDefault();
             }
@@ -72,26 +62,26 @@ namespace WorkShop.Services
         {
             try
             {
-                if (InvoiceExists(providerId, view.Serial, view.Number))
-                {
-                    return $"Invoice: {view.Number} already exists for Provider: {providerId}";
-                }
+                // if (InvoiceExists(providerId, view.Serial, view.Number))
+                // {
+                //     return $"Invoice: {view.Number} already exists for Provider: {providerId}";
+                // }
 
-                var providerInvoice = new ProviderInvoice
-                {
-                    Number = view.Number,
-                    Amount = view.Amount,
-                    Serial = view.Serial,
-                    Description = view.Description,
-                    Created = view.Created,
-                    Active  = true,
-                    Provider = new Provider
-                    {
-                        Id = providerId
-                    }
-                };
+                // var providerInvoice = new Invoice
+                // {
+                //     Number = view.Number,
+                //     Amount = view.Amount,
+                //     Serial = view.Serial,
+                //     Description = view.Description,
+                //     Created = view.Created,
+                //     Active  = true,
+                //     Provider = new Provider
+                //     {
+                //         Id = providerId
+                //     }
+                // };
 
-                _providerInvoiceClient.Add(GetStrapiToken(), providerInvoice);
+                // _providerInvoiceClient.Add(GetStrapiToken(), providerInvoice);
 
                 return view;
             }
@@ -106,37 +96,38 @@ namespace WorkShop.Services
         {
             try
             {
-                var token = GetStrapiToken();
-                var holder = _providerInvoiceClient.FindById(token, view.Id);
-                var error = "";
+                // var token = GetStrapiToken();
+                // var holder = _providerInvoiceClient.FindById(token, view.Id);
+                // var error = "";
 
-                holder.Match(some => {
+                // holder.Match(some => {
 
-                    var provider = new ProviderInvoice
-                    {
-                        Id = long.Parse(view.Id),
-                        Serial = view.Serial,
-                        Number = view.Number,
-                        Created = view.Created,
-                        Amount = view.Amount,
-                        Description = view.Description,
-                        Active = view.Active.Equals(1),
-                        Provider = new Provider
-                        {
-                            Id = providerId
-                        }
-                    };
+                //     var provider = new Invoice
+                //     {
+                //         Id = long.Parse(view.Id),
+                //         Serial = view.Serial,
+                //         Number = view.Number,
+                //         Created = view.Created,
+                //         Amount = view.Amount,
+                //         Description = view.Description,
+                //         Active = view.Active.Equals(1),
+                //         Provider = new Provider
+                //         {
+                //             Id = providerId
+                //         }
+                //     };
 
-                    _providerInvoiceClient.Update(token, provider);
+                //     _providerInvoiceClient.Update(token, provider);
 
-                }, () => error = $"Invoice: {view.Number} not found");
+                // }, () => error = $"Invoice: {view.Number} not found");
 
-                if (string.IsNullOrEmpty(error))
-                {
-                    return view;
-                }
+                // if (string.IsNullOrEmpty(error))
+                // {
+                //     return view;
+                // }
 
-                return error;
+                // return error;
+                return view;
             }
             catch (Exception ex)
             {
@@ -145,18 +136,18 @@ namespace WorkShop.Services
             }
         }
 
-        private ProviderInvoiceView ToView(ProviderInvoice providerInvoice)
+        private ProviderInvoiceView ToView(Invoice providerInvoice)
         {
             return new ProviderInvoiceView()
             {
-                Id = providerInvoice.Id.ToString(),
-                Number = providerInvoice.Number,
-                Serial = providerInvoice.Serial,
-                Active = providerInvoice.Active ? 1 : 0,
-                Description = providerInvoice.Description,
-                Amount = providerInvoice.Amount,
-                Created = providerInvoice.Created
-                // ImageUrl = providerInvoice.ImageUrl
+                // Id = providerInvoice.Id.ToString(),
+                // Number = providerInvoice.Number,
+                // Serial = providerInvoice.Serial,
+                // Active = providerInvoice.Active ? 1 : 0,
+                // Description = providerInvoice.Description,
+                // Amount = providerInvoice.Amount,
+                // Created = providerInvoice.Created
+                // // ImageUrl = providerInvoice.ImageUrl
             };
         }
 
@@ -164,7 +155,7 @@ namespace WorkShop.Services
 
         private bool InvoiceExists(string providerId, string serial, string number)
         {
-            var invoice = _dbContext.ProviderInvoices.Where(invoice => invoice.Provider.Id.Equals(Guid.Parse(providerId)) 
+            var invoice = _dbContext.Invoices.Where(invoice => invoice.Provider.Id.Equals(Guid.Parse(providerId)) 
                 && invoice.Serial.Equals(serial) && invoice.Number.Equals(number))
                 .FirstOrDefault();
 

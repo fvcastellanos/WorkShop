@@ -18,7 +18,7 @@ namespace WorkShop.Model
         public OperationType OperationType { get; set; }
 
         [ForeignKey("provider_invoice_id")]
-        public ProviderInvoice ProviderInvoice { get; set; }
+        public Invoice ProviderInvoice { get; set; }
 
         [Required]
         [Column("amount")]

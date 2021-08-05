@@ -2,39 +2,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LanguageExt;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using WorkShop.Clients;
 using WorkShop.Domain;
 using WorkShop.Model;
-using WorkShop.Providers;
 
 namespace WorkShop.Services
 {
     public class ProviderService: ServiceBase
     {
         private readonly ILogger _logger;
-        private readonly TokenProvider _tokenProvider;
-        private readonly ProviderClient _providerClient;
-
         private WorkShopContext _dbContext;
 
         public ProviderService(ILogger<ProviderService> logger, 
-                               WorkShopContext workShopContext,
-                               ProviderClient providerClient,
-                               TokenProvider tokenProvider,
-                               IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor, tokenProvider)
+                               WorkShopContext workShopContext)
         {
             _logger = logger;
             _dbContext = workShopContext;
-            _tokenProvider = tokenProvider;
-            _providerClient = providerClient;
         }
 
         public Either<string, IEnumerable<ProviderView>> GetProviders(int topRows, string code, string name, int active)
         {
             try
-            {
+            {                
                 _logger.LogInformation($"get top: {topRows} providers");
 
                 return _dbContext.Providers.Where(provider => provider.Active.Equals(active) && provider.Code.Contains(code) 
@@ -106,7 +95,7 @@ namespace WorkShop.Services
                 provider.Active = view.Active;
                 provider.Updated = DateTime.Now;
 
-                _dbContext.Update(provider);
+                _dbContext.Providers.Update(provider);
                 _dbContext.SaveChanges();
 
                 return view;

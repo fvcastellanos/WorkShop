@@ -3,13 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LanguageExt;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using WorkShop.Clients;
-// using WorkShop.Clients.Domain;
 using WorkShop.Domain;
 using WorkShop.Model;
-using WorkShop.Providers;
 
 namespace WorkShop.Services
 {
@@ -19,17 +15,11 @@ namespace WorkShop.Services
 
         private readonly WorkShopContext _dbContext;
 
-        private readonly DiscountTypeClient _discountTypeClient;
-
         public DiscountTypeService(ILogger<DiscountTypeService> logger, 
-                                   WorkShopContext workShopContext,
-                                   DiscountTypeClient discountTypeClient,
-                                   TokenProvider tokenProvider,
-                                   IHttpContextAccessor httpContextAccessor): base(httpContextAccessor, tokenProvider)
+                                   WorkShopContext workShopContext)
         {
             _logger = logger;
             _dbContext = workShopContext;
-            _discountTypeClient = discountTypeClient;
         }        
 
         public Either<string, IEnumerable<DiscountTypeView>> GetDiscountTypes(int topRows, string name, int active)
@@ -55,8 +45,8 @@ namespace WorkShop.Services
         {
             try
             {
-                var existingDiscountType = _dbContext.DiscountTypes.Where(discountType => discountType.Name.Equals(discountType.Name))
-                    .FirstOrDefault();
+                var existingDiscountType = _dbContext.DiscountTypes.FirstOrDefault(discountType => 
+                    discountType.Name.Equals(discountTypeView.Name, StringComparison.CurrentCultureIgnoreCase));
 
                 if (existingDiscountType != null)
                 {
@@ -100,7 +90,7 @@ namespace WorkShop.Services
                 discountType.Active = view.Active;
                 discountType.Updated = DateTime.Now;
 
-                _dbContext.Update(discountType);
+                _dbContext.DiscountTypes.Update(discountType);
                 _dbContext.SaveChanges();
 
                 return view;
