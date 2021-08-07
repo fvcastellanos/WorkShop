@@ -3,14 +3,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WorkShop.Domain
 {
-    public class ProviderInvoiceView
+    public class InvoiceView
     {
         public string Id { get; set; }
-        public string ProviderId { get; set; }
-        public string ProviderName { get; set; }
-        public string ProviderCode { get; set; }
-        public string ProviderTaxId { get; set; }
 
+        [Required]
+        public ProviderView ProviderView { get; set; }
+
+        [Required]
         [MaxLength(50)]
         public string Serial { get; set; }
 
@@ -20,6 +20,10 @@ namespace WorkShop.Domain
 
         [Required]
         public double Amount { get; set; }
+
+        // [Required]
+        [MaxLength(10)]
+        public string Type { get; set; }
         public string Description { get; set; }
 
         [Required]

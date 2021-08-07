@@ -172,6 +172,10 @@ namespace WorkShop.Model
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             modelBuilder.Entity<Invoice>()
+                .Property(p => p.DueDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            modelBuilder.Entity<Invoice>()
                 .HasIndex(p => p.Created)
                 .HasName("idx_invoice_created");
 

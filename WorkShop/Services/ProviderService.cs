@@ -141,6 +141,22 @@ namespace WorkShop.Services
             }
         }
 
+        public IEnumerable<ProviderView> GetActiveProviders()
+        {
+            try 
+            {
+                _logger.LogInformation("Load active providers");
+                return _dbContext.Providers.Where(provider => provider.Active.Equals(1))
+                    .Select(ToView)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Can't get active providers - ", ex.Message);
+                return new List<ProviderView>();
+            }
+        }
+
         // ---------------------------------------------------------------------------
 
        private ProviderView ToView(Provider provider)

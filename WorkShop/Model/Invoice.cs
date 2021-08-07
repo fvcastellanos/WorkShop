@@ -36,6 +36,10 @@ namespace WorkShop.Model
         [Column("due_date", TypeName = "timestamp")]
         public DateTime DueDate { get; set; }
 
+        [Column("description", TypeName = "varchar(300)")]
+        public string Description { get; set; }
+
+        [Required]
         [Column("active")]
         public int Active { get; set; }
 
@@ -48,6 +52,5 @@ namespace WorkShop.Model
         [Required]
         [Column("tenant", TypeName = "varchar(50)")]
         public string Tenant { get; set; }
-
     }
 }

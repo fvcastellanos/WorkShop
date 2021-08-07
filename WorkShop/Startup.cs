@@ -38,21 +38,21 @@ namespace WorkShop
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();
 
-            services.AddHttpContextAccessor();
+            // services.AddHttpContextAccessor();
 
-            services.AddHttpClient("strapi", options => {
+            // services.AddHttpClient("strapi", options => {
 
-                options.BaseAddress = new Uri(Configuration["Strapi:Client:Url"]);
-            });
+            //     options.BaseAddress = new Uri(Configuration["Strapi:Client:Url"]);
+            // });
 
-            services.AddScoped<TokenProvider>();
+            // services.AddScoped<TokenProvider>();
 
-            services.AddScoped<LoginClient>();
-            services.AddScoped<ProviderClient>();
-            services.AddScoped<ProductClient>();
-            services.AddScoped<OperationTypeClient>();
-            services.AddScoped<DiscountTypeClient>();
-            services.AddScoped<ProviderInvoiceClient>();
+            // services.AddScoped<LoginClient>();
+            // services.AddScoped<ProviderClient>();
+            // services.AddScoped<ProductClient>();
+            // services.AddScoped<OperationTypeClient>();
+            // services.AddScoped<DiscountTypeClient>();
+            // services.AddScoped<ProviderInvoiceClient>();
 
             services.AddScoped<ProductService>();
             services.AddScoped<OperationTypeService>();
