@@ -124,6 +124,35 @@ namespace WorkShop.Services
             }
         }
 
+        public Either<string, InvoiceDetailView> AddDetail(InvoiceDetailView invoiceDetailView)
+        {
+            try
+            {
+                var invoice = _dbContext.Invoices.Find(Guid.Parse(invoiceDetailView.InvoiceId));
+                var product = _dbContext.Products.Find(Guid.Parse(invoiceDetailView.ProductView.Id));
+
+                var detail = new InvoiceDetail
+                {
+                    Invoice = invoice,
+                    Product = product,
+                    Quantity = invoiceDetailView.Amount,
+                    Price = invoiceDetailView.Price,
+                    Total = invoiceDetailView.Amount * invoiceDetailView.Price,
+                    Created = DateTime.Now
+                };
+
+                _dbContext.InvoiceDetails.Add(detail);
+                _dbContext.SaveChanges();
+
+                return invoiceDetailView;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't add detail for invoice: {invoiceDetailView.InvoiceId} - {ex.Message}");
+                return $"Can't get details for invoice: {invoiceDetailView.InvoiceId}";
+            }
+        }
+
         // --------------------------------------------------------------------------------------------------------------
 
         private InvoiceView ToView(Invoice invoice)

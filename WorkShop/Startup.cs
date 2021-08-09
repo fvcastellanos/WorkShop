@@ -38,7 +38,7 @@ namespace WorkShop
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();
 
-            // services.AddHttpContextAccessor();
+            services.AddHttpContextAccessor();
 
             // services.AddHttpClient("strapi", options => {
 

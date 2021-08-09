@@ -37,7 +37,13 @@ namespace WorkShop.Pages
 
         protected override void Add()
         {
-            throw new System.NotImplementedException();
+            var result = ProviderInvoiceService.AddDetail(InvoiceDetailView);
+
+            result.Match(right => {
+
+                HideAddModal();
+                GetProductList();
+            }, DisplayModalError);
         }
 
         protected override void Update()
