@@ -106,6 +106,9 @@
                                     <div @onclick="() => GetInvoice(invoice.Id)" class="crud-icon">
                                         <span class="oi oi-brush" aria-hidden="true"></span>
                                     </div>
+                                    <a href="provider-invoices/@invoice.Id" class="crud-icon">
+                                        <span class="oi oi-calculator" aria-hidden="true"></span>
+                                    </a>
                                 </td>
                                 <td>@invoice.Created.ToShortDateString()</td>
                                 <td>@invoice.ProviderView.Name</td>

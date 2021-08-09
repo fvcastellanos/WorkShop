@@ -109,6 +109,23 @@ namespace WorkShop.Services
             }
         }
 
+        public Either<string, IEnumerable<InvoiceDetailView>> GetInvoiceDetails(string invoiceId, InvoiceDetailView detailView)
+        {
+            try
+            {
+                return _dbContext.InvoiceDetails.Where(detail => detail.Invoice.Id.Equals(Guid.Parse(invoiceId)))
+                    .Select(ToDetailView)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't get details for invoice: {invoiceId} - {ex.Message}");
+                return $"Can't get details for invoice: {invoiceId}";
+            }
+        }
+
+        // --------------------------------------------------------------------------------------------------------------
+
         private InvoiceView ToView(Invoice invoice)
         {
             return new InvoiceView()
@@ -126,6 +143,25 @@ namespace WorkShop.Services
                     TaxId = invoice.Provider.TaxId,
                 },
                 // ImageUrl = providerInvoice.ImageUrl
+            };
+        }
+
+        private InvoiceDetailView ToDetailView(InvoiceDetail detail)
+        {
+            return new InvoiceDetailView
+            {
+                Id = detail.Id.ToString(),
+                Amount = detail.Quantity,
+                Price = detail.Price,
+                Total = detail.Quantity * detail.Price,
+                InvoiceId = detail.Invoice.Id.ToString(),
+                ProductView = new ProductView
+                {
+                    Id = detail.Product.Id.ToString(),
+                    Code = detail.Product.Code,
+                    Name = detail.Product.Name,
+                    Active = detail.Product.Active
+                }
             };
         }
 

@@ -121,6 +121,21 @@ namespace WorkShop.Services
             }
         }
 
+        public IEnumerable<ProductView> GetActiveProducts()
+        {
+            try
+            {
+                return _dbContext.Products.Where(product => product.Active.Equals(1))
+                    .Select(ToView)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("can't get active products: {0}", ex.Message);
+                return new List<ProductView>();
+            }
+        }
+
         // -------------------------------------------------------------------------------------
 
         private static Product ToProduct(ProductView productView)

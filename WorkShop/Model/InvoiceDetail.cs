@@ -14,6 +14,9 @@ namespace WorkShop.Model
         [ForeignKey("invoice_id")]
         public Invoice Invoice { get; set; }
 
+        [ForeignKey("product_id")]
+        public Product Product { get; set; }
+
         [Required]
         [Column("quantity")]
         public double Quantity { get; set; }
