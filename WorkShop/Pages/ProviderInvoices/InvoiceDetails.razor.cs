@@ -14,6 +14,9 @@ namespace WorkShop.Pages
         [Parameter]
         public string InvoiceId { get; set; }
 
+        protected string DeleteDetailId;
+        protected bool DisplayDeleteModal;
+
         [Inject]
         protected ProviderInvoiceService ProviderInvoiceService { get; set; }
 
@@ -30,9 +33,10 @@ namespace WorkShop.Pages
 
         protected override void OnInitialized()
         {
+            DisplayDeleteModal = false;
             GetProductList();
+            GetInvoiceDetails();
             LoadInvoiceInformation();
-            InvoiceDetails = new List<InvoiceDetailView>();
         }
 
         protected override void Add()
@@ -42,13 +46,44 @@ namespace WorkShop.Pages
             result.Match(right => {
 
                 HideAddModal();
-                GetProductList();
+                GetInvoiceDetails();
             }, DisplayModalError);
         }
 
         protected override void Update()
         {
-            throw new System.NotImplementedException();
+            var result = ProviderInvoiceService.UpdateDetail(InvoiceDetailView);
+
+            result.Match(right => {
+
+                HideAddModal();
+                GetInvoiceDetails();
+            }, DisplayModalError);
+        }
+
+        protected void ShowDeleteModal(string id)
+        {
+            DisplayDeleteModal = true;
+            HideModalError();
+            DeleteDetailId = id;
+        }
+
+        protected void HideDeleteModal()
+        {
+            DisplayDeleteModal = false;
+            HideModalError();
+            DeleteDetailId = "";
+        }
+
+        protected void DeleteDetail()
+        {
+            var result = ProviderInvoiceService.DeleteDetail(DeleteDetailId);
+
+            result.Match(right => {
+
+                HideDeleteModal();
+                GetInvoiceDetails();
+            }, ShowErrorMessage);
         }
 
         protected void ShowAddModal()
@@ -71,6 +106,33 @@ namespace WorkShop.Pages
             Products = ProductService.GetActiveProducts();
         }
 
+        protected void GetInvoiceDetails()
+        {
+            InvoiceDetails = new List<InvoiceDetailView>();
+
+            var result = ProviderInvoiceService.GetInvoiceDetails(InvoiceId);
+
+            result.Match(right => {
+
+                InvoiceDetails = right;
+                LoadInvoiceInformation();
+                HideErrorMessage();
+            }, ShowErrorMessage);
+        }
+
+        protected void GetDetail(string id)
+        {
+            var holder = ProviderInvoiceService.GetDetail(id);
+
+            holder.Match(some => {
+                
+                InvoiceDetailView = some;
+                EditContext = new EditContext(InvoiceDetailView);
+
+                ShowEditModal();
+            }, () => ShowErrorMessage($"No se encuentra el detalle de la factura con id: {id}"));
+        }
+
         protected async Task<IEnumerable<ProductView>> SearchProducts(string text)
         {
             return await Task.FromResult(
@@ -90,7 +152,9 @@ namespace WorkShop.Pages
             var holder = ProviderInvoiceService.GetInvoice(InvoiceId);
 
             holder.Match(some => {
-                InvoiceView = some;
+                InvoiceView = some;                
+                InvoiceView.Amount = InvoiceDetails.Sum(detail => detail.Total);
+
             },
             () => ShowErrorMessage($"No se encontra información de la factura: {InvoiceId}"));
         }

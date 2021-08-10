@@ -109,7 +109,7 @@ namespace WorkShop.Services
             }
         }
 
-        public Either<string, IEnumerable<InvoiceDetailView>> GetInvoiceDetails(string invoiceId, InvoiceDetailView detailView)
+        public Either<string, IEnumerable<InvoiceDetailView>> GetInvoiceDetails(string invoiceId)
         {
             try
             {
@@ -150,6 +150,68 @@ namespace WorkShop.Services
             {
                 _logger.LogError($"Can't add detail for invoice: {invoiceDetailView.InvoiceId} - {ex.Message}");
                 return $"Can't get details for invoice: {invoiceDetailView.InvoiceId}";
+            }
+        }
+
+        public Either<string, InvoiceDetailView> UpdateDetail(InvoiceDetailView view)
+        {
+            try
+            {
+                var detail = _dbContext.InvoiceDetails.Find(Guid.Parse(view.Id));
+                var product = _dbContext.Products.Find(Guid.Parse(view.ProductView.Id));
+
+                detail.Quantity = view.Amount;
+                detail.Price = view.Price;
+                detail.Total = view.Price * view.Amount;
+                detail.Product = product;
+
+                _dbContext.InvoiceDetails.Update(detail);
+                _dbContext.SaveChanges();
+
+                return view;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't update detail for invoice: {view.InvoiceId} - {ex.Message}");
+                return $"Can't update detail for invoice: {view.InvoiceId}";
+            }
+        }
+
+        public Either<string, int> DeleteDetail(string id)
+        {
+            try
+            {
+                var detail = _dbContext.InvoiceDetails.Find(Guid.Parse(id));
+
+                if (detail != null)
+                {
+                    _dbContext.InvoiceDetails.Remove(detail);
+                    _dbContext.SaveChanges();
+
+                    return 1;
+                }
+                
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't deelte detail id: {id} - {ex.Message}");
+                return $"Can't delete detail id: {id}";
+            }
+        }
+
+        public Option<InvoiceDetailView> GetDetail(string detailId)
+        {
+            try
+            {
+                return _dbContext.InvoiceDetails.Where(detail => detail.Id.Equals(Guid.Parse(detailId)))
+                    .Map(ToDetailView)
+                    .FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't get invoice detail id: {detailId} - {ex.Message}");
+                return null;
             }
         }
 

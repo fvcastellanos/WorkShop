@@ -26,10 +26,14 @@
                         <th>Fecha</th>
                         <td>@InvoiceView.Created.ToShortDateString()</td>
                     </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>@InvoiceView.Amount</td>
+                    </tr>
                 </table>                           
 
                 <NavLink href="provider-invoices" class="btn btn-secondary">Facturas de Proveedores</NavLink>
-                <input type="button" class="btn btn-primary" value="Agregar Factura" @onclick="ShowAddModal" />
+                <input type="button" class="btn btn-primary" value="Agregar Detalle" @onclick="ShowAddModal" />
             </div>
         </div>
         <div class="col-10 top-separator">
@@ -49,12 +53,12 @@
                         {
                             <tr>
                                 <td>
-                                    @* <div @onclick="() => GetInvoice(invoice.Id)" class="crud-icon">
+                                    <div @onclick="() => GetDetail(detail.Id)" class="crud-icon">
                                         <span class="oi oi-brush" aria-hidden="true"></span>
                                     </div>
-                                    <a href="provider-invoices/@invoice.Id" class="crud-icon">
-                                        <span class="oi oi-calculator" aria-hidden="true"></span>
-                                    </a> *@
+                                    <div @onclick="() => ShowDeleteModal(detail.Id)" class="crud-icon">
+                                        <span class="oi oi-trash" aria-hidden="true"></span>
+                                    </div>
                                 </td>
                                 <td>@detail.Amount</td>
                                 <td>@detail.ProductView.Name</td>
@@ -123,6 +127,32 @@
                                     <input type="submit" class="btn btn-primary" value="Guardar" />
                                     <input type="button" class="btn btn-secondary" value="Cancelar" @onclick="HideAddModal"/>
                                 </EditForm>
+                            </div>
+                        </div>
+                    </div>
+                </div>    
+            }
+
+            @if (DisplayDeleteModal)
+            {
+                <div class="modal" tabindex="-1" role="dialog" style="display: block">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Borrar Detalle</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideDeleteModal">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+
+                                <ErrorMessage Display="@HasModalError" Message="@ModalErrorMessage" />
+                                <p>¿Está seguro de borrar el detalle seleecionado: @DeleteDetailId?</p>
+
+                                <input type="button" class="btn btn-danger" value="Borrar" @onclick="DeleteDetail" />
+                                <input type="button" class="btn btn-primary" value="Cancelar" @onclick="HideDeleteModal" />
+
+
                             </div>
                         </div>
                     </div>
