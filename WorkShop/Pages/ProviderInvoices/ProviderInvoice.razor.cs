@@ -87,6 +87,7 @@ namespace WorkShop.Pages
 
         protected void FindInvoices()
         {
+            HideErrorMessage();
             Invoices = new List<InvoiceView>();
 
             var result = ProviderInvoiceService.GetInvoices(InvoiceSearchView);

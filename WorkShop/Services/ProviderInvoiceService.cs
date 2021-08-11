@@ -29,13 +29,12 @@ namespace WorkShop.Services
 
                 return _dbContext.Invoices.Where(invoice => invoice.Active.Equals(searchView.Active) 
                         && invoice.Provider.Code.Contains(searchView.ProviderCode)
-                        && invoice.Provider.Code.Contains(searchView.ProviderName)
+                        && invoice.Provider.Name.Contains(searchView.ProviderName)
                         && invoice.Serial.Contains(searchView.Serial) 
                         && invoice.Number.Contains(searchView.Number))
                     .Take(searchView.TopRows)
                     .Select(ToView)
                     .ToList();
-
             }
             catch (Exception ex)
             {
@@ -135,14 +134,17 @@ namespace WorkShop.Services
                 {
                     Invoice = invoice,
                     Product = product,
-                    Quantity = invoiceDetailView.Amount,
+                    Quantity = invoiceDetailView.Quantity,
                     Price = invoiceDetailView.Price,
-                    Total = invoiceDetailView.Amount * invoiceDetailView.Price,
+                    DiscountAmount = invoiceDetailView.DiscountAmount,
+                    Total = (invoiceDetailView.Quantity * invoiceDetailView.Price) - invoiceDetailView.DiscountAmount,
                     Created = DateTime.Now
                 };
 
                 _dbContext.InvoiceDetails.Add(detail);
                 _dbContext.SaveChanges();
+
+                UpdateInvoiceAmount(invoiceDetailView.InvoiceId);
 
                 return invoiceDetailView;
             }
@@ -160,13 +162,16 @@ namespace WorkShop.Services
                 var detail = _dbContext.InvoiceDetails.Find(Guid.Parse(view.Id));
                 var product = _dbContext.Products.Find(Guid.Parse(view.ProductView.Id));
 
-                detail.Quantity = view.Amount;
+                detail.Quantity = view.Quantity;
                 detail.Price = view.Price;
-                detail.Total = view.Price * view.Amount;
+                detail.DiscountAmount = view.DiscountAmount;
+                detail.Total = (view.Price * view.Quantity) - view.DiscountAmount;
                 detail.Product = product;
 
                 _dbContext.InvoiceDetails.Update(detail);
                 _dbContext.SaveChanges();
+
+                UpdateInvoiceAmount(view.InvoiceId);
 
                 return view;
             }
@@ -187,6 +192,8 @@ namespace WorkShop.Services
                 {
                     _dbContext.InvoiceDetails.Remove(detail);
                     _dbContext.SaveChanges();
+
+                    UpdateInvoiceAmount(detail.Invoice.Id.ToString());
 
                     return 1;
                 }
@@ -226,14 +233,15 @@ namespace WorkShop.Services
                 Number = invoice.Number,
                 Active = invoice.Active,
                 Created = invoice.Created,
+                ImageUrl = invoice.ImageUrl,
+                Total = invoice.Total,                
                 ProviderView = new ProviderView
                 {
                     Id = invoice.Provider.Id.ToString(),
                     Name = invoice.Provider.Name,
                     Code = invoice.Provider.Code,
                     TaxId = invoice.Provider.TaxId,
-                },
-                // ImageUrl = providerInvoice.ImageUrl
+                }
             };
         }
 
@@ -242,9 +250,10 @@ namespace WorkShop.Services
             return new InvoiceDetailView
             {
                 Id = detail.Id.ToString(),
-                Amount = detail.Quantity,
+                Quantity = detail.Quantity,
                 Price = detail.Price,
-                Total = detail.Quantity * detail.Price,
+                DiscountAmount = detail.DiscountAmount,
+                Total = (detail.Quantity * detail.Price) - detail.DiscountAmount,
                 InvoiceId = detail.Invoice.Id.ToString(),
                 ProductView = new ProductView
                 {
@@ -265,6 +274,18 @@ namespace WorkShop.Services
                 .FirstOrDefault();
 
             return invoice != null;
+        }
+
+        private void UpdateInvoiceAmount(string invoiceId)
+        {
+            var invoice = _dbContext.Invoices.Find(Guid.Parse(invoiceId));
+
+            invoice.Total = _dbContext.InvoiceDetails
+                .Where(detail => detail.Invoice.Id.Equals(Guid.Parse(invoiceId)))
+                .Sum(detail => (detail.Quantity * detail.Price) - detail.DiscountAmount);
+
+            _dbContext.Invoices.Update(invoice);
+            _dbContext.SaveChanges();
         }
     }
 }

@@ -28,7 +28,7 @@
                     </tr>
                     <tr>
                         <th>Total</th>
-                        <td>@InvoiceView.Amount</td>
+                        <td>@InvoiceView.Total</td>
                     </tr>
                 </table>                           
 
@@ -46,6 +46,7 @@
                         <th>Cantidad</th>
                         <th>Producto</th>
                         <th>Precio</th>
+                        <th>Descuento</th>
                         <th>Total</th>
                     </thead>
                     <tbody>
@@ -60,9 +61,10 @@
                                         <span class="oi oi-trash" aria-hidden="true"></span>
                                     </div>
                                 </td>
-                                <td>@detail.Amount</td>
+                                <td>@detail.Quantity</td>
                                 <td>@detail.ProductView.Name</td>
                                 <td>@detail.Price</td>
+                                <td>@detail.DiscountAmount</td>
                                 <td>@detail.Total</td>
                             </tr>
                         }
@@ -98,7 +100,7 @@
 
                                     <div class="form-group">
                                         <label for="amount">Cantidad</label>
-                                        <input type="number" step=".01" class="form-control" id="amount" placeholder="Amount" @bind="InvoiceDetailView.Amount"/>
+                                        <input type="number" step=".01" class="form-control" id="amount" placeholder="Amount" @bind="InvoiceDetailView.Quantity"/>
                                     </div>
 
                                     <div class="form-group">
@@ -122,6 +124,10 @@
                                     <div class="form-group">
                                         <label for="price">Precio</label>
                                         <input type="number" step=".01" class="form-control" id="price" placeholder="Precio" @bind="InvoiceDetailView.Price"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="discount">Descuento</label>
+                                        <input type="number" step=".01" class="form-control" id="discount" placeholder="Descuento" @bind="InvoiceDetailView.DiscountAmount"/>
                                     </div>
 
                                     <input type="submit" class="btn btn-primary" value="Guardar" />

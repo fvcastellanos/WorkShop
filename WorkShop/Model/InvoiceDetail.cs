@@ -23,7 +23,10 @@ namespace WorkShop.Model
 
         [Required]
         [Column("price")]
-        public Double Price { get; set; }
+        public double Price { get; set; }
+
+        [Column("discount_amount")]
+        public double DiscountAmount { get; set; }
 
         [Required]
         [Column("total")]

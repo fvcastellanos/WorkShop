@@ -39,6 +39,9 @@ namespace WorkShop.Model
         [Column("description", TypeName = "varchar(300)")]
         public string Description { get; set; }
 
+        [Column("total")]
+        public double Total { get; set; }
+
         [Required]
         [Column("active")]
         public int Active { get; set; }

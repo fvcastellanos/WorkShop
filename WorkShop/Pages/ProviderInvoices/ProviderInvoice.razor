@@ -114,7 +114,7 @@
                                 <td>@invoice.ProviderView.Name</td>
                                 <td>@invoice.Serial</td>
                                 <td>@invoice.Number</td>
-                                <td>@invoice.Amount</td>
+                                <td>@invoice.Total</td>
                                 <td><BooleanField Value="@invoice.Active"/></td>
                             </tr>
                         }
@@ -183,10 +183,6 @@
                                     <div class="form-group">
                                         <label for="taxId">Fecha</label>
                                         <input type="date" class="form-control" id="date" placeholder="Fecha" @bind="InvoiceView.Created"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="contact">Monto</label>
-                                        <input type="number" step=".01" class="form-control" id="amount" placeholder="Monto" @bind="InvoiceView.Amount"/>
                                     </div>
                                     <div class="form-group">
                                         <label for="description">Descripción</label>

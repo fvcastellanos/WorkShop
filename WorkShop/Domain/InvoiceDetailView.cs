@@ -8,10 +8,12 @@ namespace WorkShop.Domain
         public string InvoiceId { get; set; }
 
         [Required]
-        public double Amount { get; set; }
+        public double Quantity { get; set; }
 
         [Required]
         public ProductView ProductView { get; set; }
+
+        public double DiscountAmount { get; set; }
 
         [Required]
         public double Price { get; set; }

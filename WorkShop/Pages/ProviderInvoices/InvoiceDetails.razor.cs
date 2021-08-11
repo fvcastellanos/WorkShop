@@ -153,8 +153,6 @@ namespace WorkShop.Pages
 
             holder.Match(some => {
                 InvoiceView = some;                
-                InvoiceView.Amount = InvoiceDetails.Sum(detail => detail.Total);
-
             },
             () => ShowErrorMessage($"No se encontra información de la factura: {InvoiceId}"));
         }

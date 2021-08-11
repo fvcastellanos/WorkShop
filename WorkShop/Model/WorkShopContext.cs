@@ -191,6 +191,10 @@ namespace WorkShop.Model
                 .HasIndex(p => p.Kind)
                 .HasName("idx_invoice_kind");
 
+            modelBuilder.Entity<Invoice>()
+                .Property(p => p.Total)
+                .HasDefaultValue(0);
+
             // Invoice Detail
             modelBuilder.Entity<InvoiceDetail>()
                 .Property(p => p.Created)
@@ -199,6 +203,10 @@ namespace WorkShop.Model
             modelBuilder.Entity<InvoiceDetail>()
                 .HasIndex(p => p.Created)
                 .HasName("idx_invoice_detail_created");
+
+            modelBuilder.Entity<InvoiceDetail>()
+                .Property(p => p.DiscountAmount)
+                .HasDefaultValue(0);
 
             // Inventory
             modelBuilder.Entity<Inventory>()

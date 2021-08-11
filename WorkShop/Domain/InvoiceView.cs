@@ -31,7 +31,8 @@ namespace WorkShop.Domain
 
         [Required]
         public int Active { get; set; }
+        public string ImageUrl { get; set; }
 
-        // public string ImageUrl { get; set; }
+        public double Total { get; set; }
     }
 }
