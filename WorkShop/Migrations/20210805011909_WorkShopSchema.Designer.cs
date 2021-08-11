@@ -9,8 +9,8 @@ using WorkShop.Model;
 namespace WorkShop.Migrations
 {
     [DbContext(typeof(WorkShopContext))]
-    [Migration("20210331052559_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20210805011909_WorkShopSchema")]
+    partial class WorkShopSchema
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,6 +23,7 @@ namespace WorkShop.Migrations
             modelBuilder.Entity("WorkShop.Model.DiscountType", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnName("id")
                         .HasColumnType("varchar(50)");
 
@@ -75,6 +76,7 @@ namespace WorkShop.Migrations
             modelBuilder.Entity("WorkShop.Model.Inventory", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnName("id")
                         .HasColumnType("varchar(50)");
 
@@ -147,9 +149,135 @@ namespace WorkShop.Migrations
                     b.ToTable("inventory");
                 });
 
+            modelBuilder.Entity("WorkShop.Model.Invoice", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id")
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("Active")
+                        .HasColumnName("active")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("created")
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnName("due_date")
+                        .HasColumnType("timestamp");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnName("image_url")
+                        .HasColumnType("varchar(250)");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnName("kind")
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasColumnName("number")
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Serial")
+                        .IsRequired()
+                        .HasColumnName("serial")
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Tenant")
+                        .IsRequired()
+                        .HasColumnName("tenant")
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnName("type")
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("Updated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("updated")
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("provider_id")
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Active")
+                        .HasName("idx_invoice_active");
+
+                    b.HasIndex("Created")
+                        .HasName("idx_invoice_created");
+
+                    b.HasIndex("Kind")
+                        .HasName("idx_invoice_kind");
+
+                    b.HasIndex("Tenant")
+                        .HasName("idx_invoice_tenant");
+
+                    b.HasIndex("Type")
+                        .HasName("idx_invoice_type");
+
+                    b.HasIndex("Updated")
+                        .HasName("idx_invoice_updated");
+
+                    b.HasIndex("provider_id");
+
+                    b.HasIndex("Serial", "Number")
+                        .HasName("idx_invoice_number");
+
+                    b.ToTable("invoice");
+                });
+
+            modelBuilder.Entity("WorkShop.Model.InvoiceDetail", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id")
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("created")
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<double>("Price")
+                        .HasColumnName("price")
+                        .HasColumnType("double");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnName("quantity")
+                        .HasColumnType("double");
+
+                    b.Property<double>("Total")
+                        .HasColumnName("total")
+                        .HasColumnType("double");
+
+                    b.Property<string>("invoice_id")
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created")
+                        .HasName("idx_invoice_detail_created");
+
+                    b.HasIndex("invoice_id");
+
+                    b.ToTable("invoice_detail");
+                });
+
             modelBuilder.Entity("WorkShop.Model.OperationType", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnName("id")
                         .HasColumnType("varchar(50)");
 
@@ -211,6 +339,7 @@ namespace WorkShop.Migrations
             modelBuilder.Entity("WorkShop.Model.Product", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnName("id")
                         .HasColumnType("varchar(50)");
 
@@ -282,6 +411,7 @@ namespace WorkShop.Migrations
             modelBuilder.Entity("WorkShop.Model.Provider", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnName("id")
                         .HasColumnType("varchar(50)");
 
@@ -351,63 +481,30 @@ namespace WorkShop.Migrations
                     b.ToTable("provider");
                 });
 
-            modelBuilder.Entity("WorkShop.Model.ProviderInvoice", b =>
+            modelBuilder.Entity("WorkShop.Model.UserToken", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnName("id")
                         .HasColumnType("varchar(50)");
 
-                    b.Property<DateTime>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("created")
-                        .HasColumnType("timestamp")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnName("image_url")
-                        .HasColumnType("varchar(250)");
-
-                    b.Property<string>("Number")
+                    b.Property<string>("Token")
                         .IsRequired()
-                        .HasColumnName("number")
-                        .HasColumnType("varchar(100)");
+                        .HasColumnName("token")
+                        .HasColumnType("varchar(150)");
 
-                    b.Property<string>("Suffix")
+                    b.Property<string>("User")
                         .IsRequired()
-                        .HasColumnName("suffix")
-                        .HasColumnType("varchar(30)");
-
-                    b.Property<string>("Tenant")
-                        .IsRequired()
-                        .HasColumnName("tenant")
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<DateTime>("Updated")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("updated")
-                        .HasColumnType("timestamp")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("provider_id")
+                        .HasColumnName("user")
                         .HasColumnType("varchar(50)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Created")
-                        .HasName("idx_provider_invoice_created");
+                    b.HasIndex("User")
+                        .IsUnique()
+                        .HasName("uq_user_token_user");
 
-                    b.HasIndex("Tenant")
-                        .HasName("idx_provider_invoice_tenant");
-
-                    b.HasIndex("Updated")
-                        .HasName("idx_provider_invoice_updated");
-
-                    b.HasIndex("provider_id");
-
-                    b.HasIndex("Suffix", "Number")
-                        .HasName("idx_provider_invoice_number");
-
-                    b.ToTable("provider_invoice");
+                    b.ToTable("user_token");
                 });
 
             modelBuilder.Entity("WorkShop.Model.Inventory", b =>
@@ -424,16 +521,23 @@ namespace WorkShop.Migrations
                         .WithMany()
                         .HasForeignKey("product_id");
 
-                    b.HasOne("WorkShop.Model.ProviderInvoice", "ProviderInvoice")
+                    b.HasOne("WorkShop.Model.Invoice", "ProviderInvoice")
                         .WithMany()
                         .HasForeignKey("provider_invoice_id");
                 });
 
-            modelBuilder.Entity("WorkShop.Model.ProviderInvoice", b =>
+            modelBuilder.Entity("WorkShop.Model.Invoice", b =>
                 {
                     b.HasOne("WorkShop.Model.Provider", "Provider")
                         .WithMany()
                         .HasForeignKey("provider_id");
+                });
+
+            modelBuilder.Entity("WorkShop.Model.InvoiceDetail", b =>
+                {
+                    b.HasOne("WorkShop.Model.Invoice", "Invoice")
+                        .WithMany()
+                        .HasForeignKey("invoice_id");
                 });
 #pragma warning restore 612, 618
         }

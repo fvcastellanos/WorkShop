@@ -3,12 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LanguageExt;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using WorkShop.Clients;
-using WorkShop.Clients.Domain;
 using WorkShop.Domain;
-using WorkShop.Providers;
+using WorkShop.Model;
 
 namespace WorkShop.Services
 {
@@ -16,15 +13,13 @@ namespace WorkShop.Services
     {
         private readonly ILogger _logger;
 
-        private readonly DiscountTypeClient _discountTypeClient;
+        private readonly WorkShopContext _dbContext;
 
         public DiscountTypeService(ILogger<DiscountTypeService> logger, 
-                                   DiscountTypeClient discountTypeClient,
-                                   TokenProvider tokenProvider,
-                                   IHttpContextAccessor httpContextAccessor): base(httpContextAccessor, tokenProvider)
+                                   WorkShopContext workShopContext)
         {
             _logger = logger;
-            _discountTypeClient = discountTypeClient;
+            _dbContext = workShopContext;
         }        
 
         public Either<string, IEnumerable<DiscountTypeView>> GetDiscountTypes(int topRows, string name, int active)
@@ -33,9 +28,11 @@ namespace WorkShop.Services
             {
                 _logger.LogInformation($"get top {topRows} discount types");
 
-                return _discountTypeClient.Find(GetStrapiToken(), topRows, name, active)
+                return _dbContext.DiscountTypes.Where(discountType => discountType.Active.Equals(active) && 
+                    discountType.Name.Contains(name))
+                    .Take(topRows)
                     .Select(ToView)
-                    .ToList();
+                    .ToList();            
             }
             catch (Exception ex)
             {
@@ -48,9 +45,10 @@ namespace WorkShop.Services
         {
             try
             {
-                var discountTypeHolder = _discountTypeClient.FindByName(GetStrapiToken(), discountTypeView.Name);
+                var existingDiscountType = _dbContext.DiscountTypes.FirstOrDefault(discountType => 
+                    discountType.Name.Equals(discountTypeView.Name, StringComparison.CurrentCultureIgnoreCase));
 
-                if (discountTypeHolder.IsSome)
+                if (existingDiscountType != null)
                 {
                     return $"Discount Type: {discountTypeView.Name} already exists";
                 }
@@ -59,10 +57,13 @@ namespace WorkShop.Services
                 {
                     Name = discountTypeView.Name,
                     Description = discountTypeView.Description,
-                    Active = true
+                    Created = DateTime.Now,
+                    Tenant = DefaultTenant,
+                    Active = 1
                 };
 
-                _discountTypeClient.Add(GetStrapiToken(), discountType);
+                _dbContext.DiscountTypes.Add(discountType);
+                _dbContext.SaveChanges();
 
                 return discountTypeView;
             }
@@ -77,27 +78,20 @@ namespace WorkShop.Services
         {
             try
             {
-                var discountTypeHolder = FindById(view.Id);
-                var error = "";
+                var discountType = _dbContext.DiscountTypes.Find(Guid.Parse(view.Id));
 
-                discountTypeHolder.Match(some => {
-
-                    var discountType = new DiscountType
-                    {
-                        Id = long.Parse(view.Id),
-                        Name = view.Name,
-                        Description = view.Description,
-                        Active = true
-                    };
-
-                    _discountTypeClient.Update(GetStrapiToken(), discountType);
-
-                }, () => error = $"Discount Type not found {view.Name}");
-
-                if (!string.IsNullOrEmpty(error))
+                if (discountType == null)
                 {
-                    return error;
+                    return $"Discount Type not found {view.Name}";
                 }
+
+                discountType.Name = view.Name;
+                discountType.Description = view.Description;
+                discountType.Active = view.Active;
+                discountType.Updated = DateTime.Now;
+
+                _dbContext.DiscountTypes.Update(discountType);
+                _dbContext.SaveChanges();
 
                 return view;
             }
@@ -112,8 +106,10 @@ namespace WorkShop.Services
         {
             try
             {
-                return _discountTypeClient.FindById(GetStrapiToken(), id)
-                    .Map(ToView);
+                return _dbContext.DiscountTypes.Where(discountType => discountType.Id.Equals(Guid.Parse(id)))
+                    .Map(ToView)
+                    .FirstOrDefault();
+
             }
             catch (Exception ex)
             {
@@ -131,7 +127,7 @@ namespace WorkShop.Services
                 Id = discountType.Id.ToString(),
                 Name = discountType.Name,
                 Description = discountType.Description,
-                Active = discountType.Active ? 1 : 0
+                Active = discountType.Active
             };
         }
     }

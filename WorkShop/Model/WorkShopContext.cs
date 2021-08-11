@@ -9,7 +9,8 @@ namespace WorkShop.Model
         public virtual DbSet<DiscountType> DiscountTypes { get; set; }
         public virtual DbSet<OperationType> OperationTypes { get; set; }
         public virtual DbSet<Provider> Providers { get; set; }
-        public virtual DbSet<ProviderInvoice> ProviderInvoices { get; set; }
+        public virtual DbSet<Invoice> Invoices { get; set; }
+        public virtual DbSet<InvoiceDetail> InvoiceDetails { get; set; }
         public virtual DbSet<Inventory> Inventories { get; set; }
         public virtual DbSet<UserToken> UserTokens { get; set; }
 
@@ -149,30 +150,63 @@ namespace WorkShop.Model
                 .HasIndex(p => p.Tenant)
                 .HasName("idx_provider_tenant");
 
-            // Provider Invoice
-            modelBuilder.Entity<ProviderInvoice>()
-                .HasIndex(p => new { p.Suffix, p.Number })
-                .HasName("idx_provider_invoice_number");
+            // Invoice
+            modelBuilder.Entity<Invoice>()
+                .HasIndex(p => new { p.Serial, p.Number })
+                .HasName("idx_invoice_number");
 
-            modelBuilder.Entity<ProviderInvoice>()
+            modelBuilder.Entity<Invoice>()
+                .HasIndex(p => p.Type)
+                .HasName("idx_invoice_type");
+
+            modelBuilder.Entity<Invoice>()
+                .HasIndex(p => p.Active)
+                .HasName("idx_invoice_active");
+
+            modelBuilder.Entity<Invoice>()
                 .Property(p => p.Created)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-            modelBuilder.Entity<ProviderInvoice>()
+            modelBuilder.Entity<Invoice>()
                 .Property(p => p.Updated)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-            modelBuilder.Entity<ProviderInvoice>()
+            modelBuilder.Entity<Invoice>()
+                .Property(p => p.DueDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            modelBuilder.Entity<Invoice>()
                 .HasIndex(p => p.Created)
-                .HasName("idx_provider_invoice_created");
+                .HasName("idx_invoice_created");
 
-            modelBuilder.Entity<ProviderInvoice>()
+            modelBuilder.Entity<Invoice>()
                 .HasIndex(p => p.Updated)
-                .HasName("idx_provider_invoice_updated");
+                .HasName("idx_invoice_updated");
 
-            modelBuilder.Entity<ProviderInvoice>()
+            modelBuilder.Entity<Invoice>()
                 .HasIndex(p => p.Tenant)
-                .HasName("idx_provider_invoice_tenant");
+                .HasName("idx_invoice_tenant");
+
+            modelBuilder.Entity<Invoice>()
+                .HasIndex(p => p.Kind)
+                .HasName("idx_invoice_kind");
+
+            modelBuilder.Entity<Invoice>()
+                .Property(p => p.Total)
+                .HasDefaultValue(0);
+
+            // Invoice Detail
+            modelBuilder.Entity<InvoiceDetail>()
+                .Property(p => p.Created)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            modelBuilder.Entity<InvoiceDetail>()
+                .HasIndex(p => p.Created)
+                .HasName("idx_invoice_detail_created");
+
+            modelBuilder.Entity<InvoiceDetail>()
+                .Property(p => p.DiscountAmount)
+                .HasDefaultValue(0);
 
             // Inventory
             modelBuilder.Entity<Inventory>()

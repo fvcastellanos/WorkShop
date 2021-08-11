@@ -2,39 +2,33 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LanguageExt;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using WorkShop.Clients;
-using WorkShop.Clients.Domain;
 using WorkShop.Domain;
-using WorkShop.Providers;
+using WorkShop.Model;
 
 namespace WorkShop.Services
 {
     public class ProviderService: ServiceBase
     {
         private readonly ILogger _logger;
-        private readonly TokenProvider _tokenProvider;
-        private readonly ProviderClient _providerClient;
+        private WorkShopContext _dbContext;
+
         public ProviderService(ILogger<ProviderService> logger, 
-                               ProviderClient providerClient,
-                               TokenProvider tokenProvider,
-                               IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor, tokenProvider)
+                               WorkShopContext workShopContext)
         {
             _logger = logger;
-            _tokenProvider = tokenProvider;
-            _providerClient = providerClient;
+            _dbContext = workShopContext;
         }
 
         public Either<string, IEnumerable<ProviderView>> GetProviders(int topRows, string code, string name, int active)
         {
             try
-            {
+            {                
                 _logger.LogInformation($"get top: {topRows} providers");
 
-                var token = GetStrapiToken();
-
-                return _providerClient.Find(token, topRows, code, name, active)
+                return _dbContext.Providers.Where(provider => provider.Active.Equals(active) && provider.Code.Contains(code) 
+                    && provider.Name.Contains(name))
+                    .Take(topRows)
                     .Select(ToView)
                     .ToList();
             }
@@ -49,7 +43,7 @@ namespace WorkShop.Services
         {
             try
             {
-                var holder = FindById(view.Code);
+                var holder = FindByCode(view.Code);
 
                 if (holder.IsSome)
                 {
@@ -63,10 +57,16 @@ namespace WorkShop.Services
                     Contact = view.Contact,
                     TaxId = view.TaxId,
                     Description = view.Description,
-                    Active = true
+                    Created = DateTime.Now,
+                    Tenant = DefaultTenant,
+                    Active = 1
                 };
 
-                _providerClient.Add(GetStrapiToken(), provider);                
+                _dbContext.Providers.Add(provider);
+                _dbContext.SaveChanges();
+
+                view.Id = provider.Id.ToString();
+
                 return view;
             }
             catch (Exception ex)
@@ -80,33 +80,23 @@ namespace WorkShop.Services
         {
             try
             {
-                var token = GetStrapiToken();
-                var providerHolder = _providerClient.FindById(token, view.Id);
-                var error = "";                
+                var provider = _dbContext.Providers.Find(Guid.Parse(view.Id));
 
-                providerHolder.Match(some => {
-                    
-                    var update = new Provider
-                    {
-                        Id = long.Parse(view.Id),
-                        Name = view.Name,
-                        Code = view.Code,
-                        Contact = view.Contact,
-                        TaxId = view.TaxId,
-                        Description = view.Description,
-                        Active = view.Active.Equals(1)
-                    };
-
-                    _providerClient.Update(token, update);
-                }, () => {
-
-                    error = $"Provider: {view.Name} not found";
-                });
-
-                if (!String.IsNullOrEmpty(error))
+                if (provider == null)
                 {
-                    return error;
+                    return $"Provider: {view.Name} not found";
                 }
+
+                provider.Code = view.Code;
+                provider.Name = view.Name;
+                provider.Contact = view.Contact;
+                provider.Description = view.Description;
+                provider.TaxId = view.TaxId;
+                provider.Active = view.Active;
+                provider.Updated = DateTime.Now;
+
+                _dbContext.Providers.Update(provider);
+                _dbContext.SaveChanges();
 
                 return view;
             }
@@ -117,20 +107,53 @@ namespace WorkShop.Services
             }
         }
 
+        public Option<ProviderView> FindByCode(string code)
+        {
+            try
+            {
+                _logger.LogInformation($"looking for provider with code: {code}");
+
+                return _dbContext.Providers.Where(provider => provider.Code.Equals(Guid.Parse(code)))
+                    .Map(ToView)
+                    .FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"can't find provider with id {code} - {ex.Message}");
+                return null;
+            }
+        }
+
         public Option<ProviderView> FindById(string id)
         {
             try
             {
                 _logger.LogInformation($"looking for provider with id: {id}");
 
-                var token = GetStrapiToken();
-                return _providerClient.FindById(token, id)
-                    .Map(ToView);
+                return _dbContext.Providers.Where(provider => provider.Id.Equals(Guid.Parse(id)))
+                    .Map(ToView)
+                    .FirstOrDefault();                    
             }
             catch (Exception ex)
             {
                 _logger.LogError($"can't find provider with id {id} - {ex.Message}");
                 return null;
+            }
+        }
+
+        public IEnumerable<ProviderView> GetActiveProviders()
+        {
+            try 
+            {
+                _logger.LogInformation("Load active providers");
+                return _dbContext.Providers.Where(provider => provider.Active.Equals(1))
+                    .Select(ToView)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Can't get active providers - ", ex.Message);
+                return new List<ProviderView>();
             }
         }
 
@@ -146,7 +169,7 @@ namespace WorkShop.Services
                 Contact = provider.Contact,
                 Description = provider.Description,
                 TaxId = provider.TaxId,
-                Active = provider.Active ? 1 : 0
+                Active = provider.Active
             };
         }         
     }

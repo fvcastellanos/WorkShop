@@ -14,5 +14,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="3.1.16"/>
     <PackageReference Include="Blazored.SessionStorage" Version="2.1.0"/>
     <PackageReference Include="Blazored.LocalStorage" Version="4.1.2"/>
+    <PackageReference Include="Blazored.Typeahead" Version="4.6.0"/>
   </ItemGroup>
 </Project>

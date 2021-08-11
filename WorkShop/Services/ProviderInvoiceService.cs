@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LanguageExt;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using WorkShop.Clients;
-using WorkShop.Clients.Domain;
 using WorkShop.Domain;
-using WorkShop.Providers;
+using WorkShop.Model;
 
 namespace WorkShop.Services
 {
@@ -15,38 +12,44 @@ namespace WorkShop.Services
     {
         private readonly ILogger _logger;
 
-        private readonly ProviderInvoiceClient _providerInvoiceClient;
+        private readonly WorkShopContext _dbContext;
 
-        public ProviderInvoiceService(IHttpContextAccessor httpContextAccessor, 
-                                      TokenProvider tokenProvider,
-                                      ILogger<ProviderInvoiceService> logger,
-                                      ProviderInvoiceClient providerInvoiceClient) : base(httpContextAccessor, tokenProvider)
+        public ProviderInvoiceService(ILogger<ProviderInvoiceService> logger,
+                                      WorkShopContext workShopContext)
         {
-            _providerInvoiceClient = providerInvoiceClient;
             _logger = logger;
+            _dbContext = workShopContext;
         }
 
-        public Either<string, IEnumerable<ProviderInvoiceView>> GetInvoices(long providerId, string number = "", int active = 1, int top = 25)
+        public Either<string, IEnumerable<InvoiceView>> GetInvoices(InvoiceSearchView searchView)
         {
             try
             {
-                return _providerInvoiceClient.Find(GetStrapiToken(), top, providerId, number, active)
-                    .Map(ToView)
+                _logger.LogInformation($"Get top: {searchView.TopRows} invoices");
+
+                return _dbContext.Invoices.Where(invoice => invoice.Active.Equals(searchView.Active) 
+                        && invoice.Provider.Code.Contains(searchView.ProviderCode)
+                        && invoice.Provider.Name.Contains(searchView.ProviderName)
+                        && invoice.Serial.Contains(searchView.Serial) 
+                        && invoice.Number.Contains(searchView.Number))
+                    .Take(searchView.TopRows)
+                    .Select(ToView)
                     .ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Can't get invoices for provider id: {providerId} - ", ex.Message);
-                return $"Can't get Invoices for provider id: {providerId}";
+                _logger.LogError($"Can't get invoices - ", ex.Message);
+                return "Can't get Invoices";
             }
         }
 
-        public Option<ProviderInvoiceView> GetInvoice(string invoiceId)
+        public Option<InvoiceView> GetInvoice(string invoiceId)
         {
             try
             {
-                 return _providerInvoiceClient.FindById(GetStrapiToken(), invoiceId)
-                    .Map(ToView);
+                return _dbContext.Invoices.Where(invoice => invoice.Id.Equals(Guid.Parse(invoiceId)))
+                    .Map(ToView)
+                    .FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -55,106 +58,234 @@ namespace WorkShop.Services
             }
         }
 
-        public Either<string, ProviderInvoiceView> Add(long providerId, ProviderInvoiceView view)
+        public Either<string, InvoiceView> Add(InvoiceView view)
         {
             try
             {
-                if (InvoiceExists(providerId, view.Suffix, view.Number))
+                if (InvoiceExists(view))
                 {
-                    return $"Invoice: {view.Number} already exists for Provider: {providerId}";
+                    return $"Invoice: {view.Number} already exists for Provider: {view.ProviderView.Name}";
                 }
 
-                var providerInvoice = new ProviderInvoice
+                var provider = _dbContext.Providers.Find(Guid.Parse(view.ProviderView.Id));
+
+                var invoice = new Invoice
                 {
+                    Serial = view.Serial,
                     Number = view.Number,
-                    Amount = view.Amount,
-                    Suffix = view.Suffix,
+                    // Amount = view.Amount,
                     Description = view.Description,
                     Created = view.Created,
-                    Active  = true,
-                    Provider = new Provider
-                    {
-                        Id = providerId
-                    }
+                    Active  = 1,
+                    Kind = "Provider",
+                    Type = "Cash",
+                    Provider = provider,
+                    Tenant = DefaultTenant
                 };
 
-                _providerInvoiceClient.Add(GetStrapiToken(), providerInvoice);
+                _dbContext.Invoices.Add(invoice);
+                _dbContext.SaveChanges();
 
                 return view;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Can't add invoice number {view.Number} for provider: {providerId} - ", ex.Message);
-                return $"Can't add invoice number {view.Number} for provider: {providerId}";
+                _logger.LogError($"Can't add invoice number {view.Number} for provider: {view.ProviderView.Name} - {ex.Message}");
+                return $"Can't add invoice number {view.Number} for provider: {view.ProviderView.Name}";
             }
         }
 
-        public Either<string, ProviderInvoiceView> Update(long providerId, ProviderInvoiceView view)
+        public Either<string, InvoiceView> Update(long providerId, InvoiceView view)
         {
             try
             {
-                var token = GetStrapiToken();
-                var holder = _providerInvoiceClient.FindById(token, view.Id);
-                var error = "";
-
-                holder.Match(some => {
-
-                    var provider = new ProviderInvoice
-                    {
-                        Id = long.Parse(view.Id),
-                        Suffix = view.Suffix,
-                        Number = view.Number,
-                        Created = view.Created,
-                        Amount = view.Amount,
-                        Description = view.Description,
-                        Active = view.Active.Equals(1),
-                        Provider = new Provider
-                        {
-                            Id = providerId
-                        }
-                    };
-
-                    _providerInvoiceClient.Update(token, provider);
-
-                }, () => error = $"Invoice: {view.Number} not found");
-
-                if (string.IsNullOrEmpty(error))
-                {
-                    return view;
-                }
-
-                return error;
+                return view;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Can't update invoice number: {view.Number} for provider: {providerId} - ", ex.Message);
+                _logger.LogError($"Can't update invoice number: {view.Number} for provider: {providerId} - {ex.Message}");
                 return $"Can't update invoice number: {view.Number} for provider: {providerId}";
             }
         }
 
-        private ProviderInvoiceView ToView(ProviderInvoice providerInvoice)
+        public Either<string, IEnumerable<InvoiceDetailView>> GetInvoiceDetails(string invoiceId)
         {
-            return new ProviderInvoiceView()
+            try
             {
-                Id = providerInvoice.Id.ToString(),
-                Number = providerInvoice.Number,
-                Suffix = providerInvoice.Suffix,
-                Active = providerInvoice.Active ? 1 : 0,
-                Description = providerInvoice.Description,
-                Amount = providerInvoice.Amount,
-                Created = providerInvoice.Created
-                // ImageUrl = providerInvoice.ImageUrl
+                return _dbContext.InvoiceDetails.Where(detail => detail.Invoice.Id.Equals(Guid.Parse(invoiceId)))
+                    .Select(ToDetailView)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't get details for invoice: {invoiceId} - {ex.Message}");
+                return $"Can't get details for invoice: {invoiceId}";
+            }
+        }
+
+        public Either<string, InvoiceDetailView> AddDetail(InvoiceDetailView invoiceDetailView)
+        {
+            try
+            {
+                var invoice = _dbContext.Invoices.Find(Guid.Parse(invoiceDetailView.InvoiceId));
+                var product = _dbContext.Products.Find(Guid.Parse(invoiceDetailView.ProductView.Id));
+
+                var detail = new InvoiceDetail
+                {
+                    Invoice = invoice,
+                    Product = product,
+                    Quantity = invoiceDetailView.Quantity,
+                    Price = invoiceDetailView.Price,
+                    DiscountAmount = invoiceDetailView.DiscountAmount,
+                    Total = (invoiceDetailView.Quantity * invoiceDetailView.Price) - invoiceDetailView.DiscountAmount,
+                    Created = DateTime.Now
+                };
+
+                _dbContext.InvoiceDetails.Add(detail);
+                _dbContext.SaveChanges();
+
+                UpdateInvoiceAmount(invoiceDetailView.InvoiceId);
+
+                return invoiceDetailView;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't add detail for invoice: {invoiceDetailView.InvoiceId} - {ex.Message}");
+                return $"Can't get details for invoice: {invoiceDetailView.InvoiceId}";
+            }
+        }
+
+        public Either<string, InvoiceDetailView> UpdateDetail(InvoiceDetailView view)
+        {
+            try
+            {
+                var detail = _dbContext.InvoiceDetails.Find(Guid.Parse(view.Id));
+                var product = _dbContext.Products.Find(Guid.Parse(view.ProductView.Id));
+
+                detail.Quantity = view.Quantity;
+                detail.Price = view.Price;
+                detail.DiscountAmount = view.DiscountAmount;
+                detail.Total = (view.Price * view.Quantity) - view.DiscountAmount;
+                detail.Product = product;
+
+                _dbContext.InvoiceDetails.Update(detail);
+                _dbContext.SaveChanges();
+
+                UpdateInvoiceAmount(view.InvoiceId);
+
+                return view;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't update detail for invoice: {view.InvoiceId} - {ex.Message}");
+                return $"Can't update detail for invoice: {view.InvoiceId}";
+            }
+        }
+
+        public Either<string, int> DeleteDetail(string id)
+        {
+            try
+            {
+                var detail = _dbContext.InvoiceDetails.Find(Guid.Parse(id));
+
+                if (detail != null)
+                {
+                    _dbContext.InvoiceDetails.Remove(detail);
+                    _dbContext.SaveChanges();
+
+                    UpdateInvoiceAmount(detail.Invoice.Id.ToString());
+
+                    return 1;
+                }
+                
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't deelte detail id: {id} - {ex.Message}");
+                return $"Can't delete detail id: {id}";
+            }
+        }
+
+        public Option<InvoiceDetailView> GetDetail(string detailId)
+        {
+            try
+            {
+                return _dbContext.InvoiceDetails.Where(detail => detail.Id.Equals(Guid.Parse(detailId)))
+                    .Map(ToDetailView)
+                    .FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Can't get invoice detail id: {detailId} - {ex.Message}");
+                return null;
+            }
+        }
+
+        // --------------------------------------------------------------------------------------------------------------
+
+        private InvoiceView ToView(Invoice invoice)
+        {
+            return new InvoiceView()
+            {
+                Id = invoice.Id.ToString(),
+                Serial = invoice.Serial,
+                Number = invoice.Number,
+                Active = invoice.Active,
+                Created = invoice.Created,
+                ImageUrl = invoice.ImageUrl,
+                Total = invoice.Total,                
+                ProviderView = new ProviderView
+                {
+                    Id = invoice.Provider.Id.ToString(),
+                    Name = invoice.Provider.Name,
+                    Code = invoice.Provider.Code,
+                    TaxId = invoice.Provider.TaxId,
+                }
             };
         }
 
-
-
-        private bool InvoiceExists(long providerId, string suffix, string number)
+        private InvoiceDetailView ToDetailView(InvoiceDetail detail)
         {
+            return new InvoiceDetailView
+            {
+                Id = detail.Id.ToString(),
+                Quantity = detail.Quantity,
+                Price = detail.Price,
+                DiscountAmount = detail.DiscountAmount,
+                Total = (detail.Quantity * detail.Price) - detail.DiscountAmount,
+                InvoiceId = detail.Invoice.Id.ToString(),
+                ProductView = new ProductView
+                {
+                    Id = detail.Product.Id.ToString(),
+                    Code = detail.Product.Code,
+                    Name = detail.Product.Name,
+                    Active = detail.Product.Active
+                }
+            };
+        }
 
-            var holder = _providerInvoiceClient.FindByNumber(GetStrapiToken(), providerId, suffix, number);
-            
-            return holder.IsSome;
+        private bool InvoiceExists(InvoiceView invoiceView)
+        {
+            var invoice = _dbContext.Invoices.Where(invoice => 
+                    invoice.Provider.Id.Equals(Guid.Parse(invoiceView.ProviderView.Id)) 
+                    && invoice.Serial.Equals(invoiceView.Serial) 
+                    && invoice.Number.Equals(invoiceView.Number))
+                .FirstOrDefault();
+
+            return invoice != null;
+        }
+
+        private void UpdateInvoiceAmount(string invoiceId)
+        {
+            var invoice = _dbContext.Invoices.Find(Guid.Parse(invoiceId));
+
+            invoice.Total = _dbContext.InvoiceDetails
+                .Where(detail => detail.Invoice.Id.Equals(Guid.Parse(invoiceId)))
+                .Sum(detail => (detail.Quantity * detail.Price) - detail.DiscountAmount);
+
+            _dbContext.Invoices.Update(invoice);
+            _dbContext.SaveChanges();
         }
     }
 }

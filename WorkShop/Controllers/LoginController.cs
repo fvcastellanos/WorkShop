@@ -14,20 +14,21 @@ namespace WorkShop.Controllers
     [Route("/Login")]
     public class LoginController: Controller
     {
-        private readonly LoginClient _loginClient;
+        // private readonly LoginClient _loginClient;
         private readonly HttpContext _httpContext;
-        private readonly TokenProvider _tokenProvider;
+        // private readonly TokenProvider _tokenProvider;
         private readonly ILogger _logger;
 
-        public LoginController(LoginClient loginClient,
-                               IHttpContextAccessor httpContextAccessor,
-                               TokenProvider tokenProvider,
+        // public LoginController(LoginClient loginClient,
+        //                        IHttpContextAccessor httpContextAccessor,
+        //                        TokenProvider tokenProvider,
+        //                        ILoggerFactory loggerFactory)
+        public LoginController(IHttpContextAccessor httpContextAccessor,
                                ILoggerFactory loggerFactory)
         {
-            _loginClient = loginClient;
-            _httpContext = httpContextAccessor.HttpContext;
-            _tokenProvider = tokenProvider;
+
             _logger = loggerFactory.CreateLogger<LoginController>();
+            _httpContext = httpContextAccessor.HttpContext;
         }
 
         [HttpGet]
@@ -35,8 +36,8 @@ namespace WorkShop.Controllers
         {
             if (Request.Query.ContainsKey("logout"))
             {
-                _tokenProvider.RemoveToken(_httpContext.User.Identity.Name);
-                _httpContext.SignOutAsync();
+                // _tokenProvider.RemoveToken(_httpContext.User.Identity.Name);
+                // _httpContext.SignOutAsync();
             }
 
             return View("Login");
@@ -62,24 +63,48 @@ namespace WorkShop.Controllers
 
         private bool AuthenticateUser(LoginModel loginModel)
         {
-            var result = _loginClient.PerformLogin(loginModel.User, loginModel.Password);
+            // var result = _loginClient.PerformLogin(loginModel.User, loginModel.Password);
             var authenticated = false;
 
-            result.Match(response => {
-
-                var principal = BuildClaimsPrincipal(response);
-                var authenticationProperties = new AuthenticationProperties()
+            var response = new LoginResponse
+            {
+                Jwt = "jwt",
+                User = new User
                 {
-                    IsPersistent = true
-                };
+                    Email = "jpenas@mail.net",
+                    Username = "jpenas",
+                    Id = 1
+                }
+            };
 
-                _httpContext.SignInAsync(principal, authenticationProperties);
-                _tokenProvider.StoreToken(loginModel.User, response.Jwt);
-                authenticated = true;
+            var principal = BuildClaimsPrincipal(response);
+            var authenticationProperties = new AuthenticationProperties()
+            {
+                IsPersistent = true
+            };
 
-                _logger.LogInformation("Success authentication for user: {0}", loginModel.User);
+            _httpContext.SignInAsync(principal, authenticationProperties);
+            // _tokenProvider.StoreToken(loginModel.User, response.Jwt);
+            authenticated = true;
 
-            }, () => _logger.LogWarning("Unable to authenticate user: {0}", loginModel.User));
+            _logger.LogInformation("Success authentication for user: {0}", loginModel.User);
+
+
+            // result.Match(response => {
+
+            //     var principal = BuildClaimsPrincipal(response);
+            //     var authenticationProperties = new AuthenticationProperties()
+            //     {
+            //         IsPersistent = true
+            //     };
+
+            //     _httpContext.SignInAsync(principal, authenticationProperties);
+            //     _tokenProvider.StoreToken(loginModel.User, response.Jwt);
+            //     authenticated = true;
+
+            //     _logger.LogInformation("Success authentication for user: {0}", loginModel.User);
+
+            // }, () => _logger.LogWarning("Unable to authenticate user: {0}", loginModel.User));
 
             return authenticated;
         }

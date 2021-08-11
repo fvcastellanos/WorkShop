@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WorkShop.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class WorkShopSchema : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -90,24 +90,42 @@ namespace WorkShop.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "provider_invoice",
+                name: "user_token",
+                schema: "workshop",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "varchar(50)", nullable: false),
+                    user = table.Column<string>(type: "varchar(50)", nullable: false),
+                    token = table.Column<string>(type: "varchar(150)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_user_token", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "invoice",
                 schema: "workshop",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(50)", nullable: false),
                     provider_id = table.Column<string>(nullable: true),
-                    suffix = table.Column<string>(type: "varchar(30)", nullable: false),
+                    serial = table.Column<string>(type: "varchar(50)", nullable: false),
                     number = table.Column<string>(type: "varchar(100)", nullable: false),
+                    kind = table.Column<string>(type: "varchar(50)", nullable: false),
+                    type = table.Column<string>(type: "varchar(50)", nullable: false),
                     image_url = table.Column<string>(type: "varchar(250)", nullable: true),
+                    due_date = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    active = table.Column<int>(nullable: false),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     tenant = table.Column<string>(type: "varchar(50)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_provider_invoice", x => x.id);
+                    table.PrimaryKey("PK_invoice", x => x.id);
                     table.ForeignKey(
-                        name: "FK_provider_invoice_provider_provider_id",
+                        name: "FK_invoice_provider_provider_id",
                         column: x => x.provider_id,
                         principalSchema: "workshop",
                         principalTable: "provider",
@@ -158,10 +176,34 @@ namespace WorkShop.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_inventory_provider_invoice_provider_invoice_id",
+                        name: "FK_inventory_invoice_provider_invoice_id",
                         column: x => x.provider_invoice_id,
                         principalSchema: "workshop",
-                        principalTable: "provider_invoice",
+                        principalTable: "invoice",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "invoice_detail",
+                schema: "workshop",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "varchar(50)", nullable: false),
+                    invoice_id = table.Column<string>(nullable: true),
+                    quantity = table.Column<double>(nullable: false),
+                    price = table.Column<double>(nullable: false),
+                    total = table.Column<double>(nullable: false),
+                    created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_invoice_detail", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_invoice_detail_invoice_invoice_id",
+                        column: x => x.invoice_id,
+                        principalSchema: "workshop",
+                        principalTable: "invoice",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -225,6 +267,66 @@ namespace WorkShop.Migrations
                 schema: "workshop",
                 table: "inventory",
                 column: "provider_invoice_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_invoice_active",
+                schema: "workshop",
+                table: "invoice",
+                column: "active");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_invoice_created",
+                schema: "workshop",
+                table: "invoice",
+                column: "created");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_invoice_kind",
+                schema: "workshop",
+                table: "invoice",
+                column: "kind");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_invoice_tenant",
+                schema: "workshop",
+                table: "invoice",
+                column: "tenant");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_invoice_type",
+                schema: "workshop",
+                table: "invoice",
+                column: "type");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_invoice_updated",
+                schema: "workshop",
+                table: "invoice",
+                column: "updated");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_invoice_provider_id",
+                schema: "workshop",
+                table: "invoice",
+                column: "provider_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_invoice_number",
+                schema: "workshop",
+                table: "invoice",
+                columns: new[] { "serial", "number" });
+
+            migrationBuilder.CreateIndex(
+                name: "idx_invoice_detail_created",
+                schema: "workshop",
+                table: "invoice_detail",
+                column: "created");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_invoice_detail_invoice_id",
+                schema: "workshop",
+                table: "invoice_detail",
+                column: "invoice_id");
 
             migrationBuilder.CreateIndex(
                 name: "idx_operation_type_created",
@@ -307,40 +409,25 @@ namespace WorkShop.Migrations
                 column: "updated");
 
             migrationBuilder.CreateIndex(
-                name: "idx_provider_invoice_created",
+                name: "uq_user_token_user",
                 schema: "workshop",
-                table: "provider_invoice",
-                column: "created");
-
-            migrationBuilder.CreateIndex(
-                name: "idx_provider_invoice_tenant",
-                schema: "workshop",
-                table: "provider_invoice",
-                column: "tenant");
-
-            migrationBuilder.CreateIndex(
-                name: "idx_provider_invoice_updated",
-                schema: "workshop",
-                table: "provider_invoice",
-                column: "updated");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_provider_invoice_provider_id",
-                schema: "workshop",
-                table: "provider_invoice",
-                column: "provider_id");
-
-            migrationBuilder.CreateIndex(
-                name: "idx_provider_invoice_number",
-                schema: "workshop",
-                table: "provider_invoice",
-                columns: new[] { "suffix", "number" });
+                table: "user_token",
+                column: "user",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "inventory",
+                schema: "workshop");
+
+            migrationBuilder.DropTable(
+                name: "invoice_detail",
+                schema: "workshop");
+
+            migrationBuilder.DropTable(
+                name: "user_token",
                 schema: "workshop");
 
             migrationBuilder.DropTable(
@@ -356,7 +443,7 @@ namespace WorkShop.Migrations
                 schema: "workshop");
 
             migrationBuilder.DropTable(
-                name: "provider_invoice",
+                name: "invoice",
                 schema: "workshop");
 
             migrationBuilder.DropTable(
