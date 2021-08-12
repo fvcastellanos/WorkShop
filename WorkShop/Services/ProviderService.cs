@@ -5,19 +5,21 @@ using LanguageExt;
 using Microsoft.Extensions.Logging;
 using WorkShop.Domain;
 using WorkShop.Model;
+using WorkShop.Repositories;
 
 namespace WorkShop.Services
 {
     public class ProviderService: ServiceBase
     {
         private readonly ILogger _logger;
-        private WorkShopContext _dbContext;
+
+        private readonly ProviderRepository _providerRepository;
 
         public ProviderService(ILogger<ProviderService> logger, 
-                               WorkShopContext workShopContext)
+                               ProviderRepository providerRepository)
         {
             _logger = logger;
-            _dbContext = workShopContext;
+            _providerRepository = providerRepository;
         }
 
         public Either<string, IEnumerable<ProviderView>> GetProviders(int topRows, string code, string name, int active)
@@ -26,9 +28,7 @@ namespace WorkShop.Services
             {                
                 _logger.LogInformation($"get top: {topRows} providers");
 
-                return _dbContext.Providers.Where(provider => provider.Active.Equals(active) && provider.Code.Contains(code) 
-                    && provider.Name.Contains(name))
-                    .Take(topRows)
+                return _providerRepository.FindProviders(topRows, code, name, active)
                     .Select(ToView)
                     .ToList();
             }
@@ -43,7 +43,7 @@ namespace WorkShop.Services
         {
             try
             {
-                var holder = FindByCode(view.Code);
+                var holder = _providerRepository.FindByCode(view.Code);
 
                 if (holder.IsSome)
                 {
@@ -62,12 +62,9 @@ namespace WorkShop.Services
                     Active = 1
                 };
 
-                _dbContext.Providers.Add(provider);
-                _dbContext.SaveChanges();
+                var storedProvider = _providerRepository.Add(provider);
 
-                view.Id = provider.Id.ToString();
-
-                return view;
+                return ToView(storedProvider);
             }
             catch (Exception ex)
             {
@@ -80,13 +77,14 @@ namespace WorkShop.Services
         {
             try
             {
-                var provider = _dbContext.Providers.Find(Guid.Parse(view.Id));
+                var providerHolder = _providerRepository.FindById(view.Id);
 
-                if (provider == null)
+                if (providerHolder.IsNone)
                 {
                     return $"Provider: {view.Name} not found";
                 }
 
+                var provider = providerHolder.FirstOrDefault();
                 provider.Code = view.Code;
                 provider.Name = view.Name;
                 provider.Contact = view.Contact;
@@ -95,32 +93,14 @@ namespace WorkShop.Services
                 provider.Active = view.Active;
                 provider.Updated = DateTime.Now;
 
-                _dbContext.Providers.Update(provider);
-                _dbContext.SaveChanges();
+                var storedProvider = _providerRepository.Update(provider);
 
-                return view;
+                return ToView(storedProvider);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"can't update provider: {view.Name} - ", ex.Message);
                 return $"Can't update provider: {view.Name}";
-            }
-        }
-
-        public Option<ProviderView> FindByCode(string code)
-        {
-            try
-            {
-                _logger.LogInformation($"looking for provider with code: {code}");
-
-                return _dbContext.Providers.Where(provider => provider.Code.Equals(Guid.Parse(code)))
-                    .Map(ToView)
-                    .FirstOrDefault();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"can't find provider with id {code} - {ex.Message}");
-                return null;
             }
         }
 
@@ -130,7 +110,7 @@ namespace WorkShop.Services
             {
                 _logger.LogInformation($"looking for provider with id: {id}");
 
-                return _dbContext.Providers.Where(provider => provider.Id.Equals(Guid.Parse(id)))
+                return _providerRepository.FindById(id)
                     .Map(ToView)
                     .FirstOrDefault();                    
             }
@@ -146,7 +126,7 @@ namespace WorkShop.Services
             try 
             {
                 _logger.LogInformation("Load active providers");
-                return _dbContext.Providers.Where(provider => provider.Active.Equals(1))
+                return _providerRepository.GetActiveProviders()
                     .Select(ToView)
                     .ToList();
             }

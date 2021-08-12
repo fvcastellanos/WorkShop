@@ -5,6 +5,7 @@ using LanguageExt;
 using Microsoft.Extensions.Logging;
 using WorkShop.Domain;
 using WorkShop.Model;
+using WorkShop.Repositories;
 
 namespace WorkShop.Services
 {
@@ -12,13 +13,13 @@ namespace WorkShop.Services
     {
         private readonly ILogger _logger;
 
-        private readonly WorkShopContext _dbContext;
+        private readonly OperationTypeRepository _operationTypeRepository;
 
         public OperationTypeService(ILogger<OperationTypeService> logger, 
-                                    WorkShopContext workShopContext)
+                                    OperationTypeRepository operationTypeRepository)
         {
             _logger = logger;
-            _dbContext = workShopContext;
+            _operationTypeRepository = operationTypeRepository;
         }
 
         public Option<OperationTypeView> GetById(string id)
@@ -27,7 +28,7 @@ namespace WorkShop.Services
             {
                 _logger.LogInformation($"load operation type with id: {id}");
 
-                return _dbContext.OperationTypes.Where(operationType => operationType.Id.Equals(Guid.Parse(id)))
+                return _operationTypeRepository.FindById(id)
                     .Map(ToView)
                     .FirstOrDefault();
             }
@@ -44,15 +45,9 @@ namespace WorkShop.Services
             {
                 _logger.LogInformation($"Get top {top} operation types");
 
-                return _dbContext.OperationTypes.Where(operationType => operationType.Active.Equals(active) && 
-                    operationType.Name.Contains(name))
-                    .Take(top)
+                return _operationTypeRepository.FindOperationTypes(top, name, active)
                     .Select(ToView)
                     .ToList();
-
-                // return _operationTypeClient.Find(GetStrapiToken(), top, name, active)
-                //     .Select(ToView)
-                //     .ToList();
             }
             catch (Exception ex)
             {
@@ -65,12 +60,14 @@ namespace WorkShop.Services
         {
             try
             {
-                var operationTypeHolder = FindByName(view.Name);
+                var operationTypeHolder = _operationTypeRepository.FindByName(view.Name);
 
                 if (operationTypeHolder.IsSome)
                 {
                     return $"Operation Type with name: {view.Name} already exists";
                 }
+
+                _logger.LogInformation($"Add new operation type with name: {view.Name}");
 
                 var operationType = new OperationType
                 {
@@ -82,11 +79,9 @@ namespace WorkShop.Services
                     Tenant = DefaultTenant
                 };
 
-                _dbContext.OperationTypes.Add(operationType);
-                _dbContext.SaveChanges();
+                var storedEntity = _operationTypeRepository.Add(operationType);
 
-                _logger.LogInformation($"Add new operation type with name: {view.Name}");
-                return view;
+                return ToView(storedEntity);
 
             }
             catch (Exception exception)
@@ -100,24 +95,23 @@ namespace WorkShop.Services
         {
             try
             {
-                var operationType = _dbContext.OperationTypes.Find(Guid.Parse(view.Id));
+                var operationTypeHolder = _operationTypeRepository.FindById(view.Id);
 
-                if (operationType == null)
+                if (operationTypeHolder.IsNone)
                 {
                     return $"Operation Type: {view.Name} not found";
                 }
 
+                var operationType = operationTypeHolder.FirstOrDefault();
                 operationType.Name = view.Name;
                 operationType.Description = view.Description;
                 operationType.Inbound = view.Inbound;
                 operationType.Active = view.Active;
                 operationType.Updated = DateTime.Now;
 
-                _dbContext.OperationTypes.Update(operationType);
-                _dbContext.SaveChanges();
+                var storedEntity = _operationTypeRepository.Update(operationType);
 
-                return view;
-
+                return ToView(storedEntity);
             }
             catch (Exception ex)
             {
@@ -127,22 +121,6 @@ namespace WorkShop.Services
         }
 
         // ---------------------------------------------------------------------------------------------------------
-
-        private Option<OperationTypeView> FindByName(string name)
-        {
-            try
-            {
-                return _dbContext.OperationTypes.Where(operationType => 
-                    operationType.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase))
-                    .Select(ToView)
-                    .FirstOrDefault();
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError($"can't find operation type with name: {name} - ", exception.Message);
-                return null;
-            }
-        }
 
         private OperationTypeView ToView(OperationType operationType)
         {

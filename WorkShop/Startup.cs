@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,9 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Steeltoe.Connector.MySql.EFCore;
 using Steeltoe.Management.Endpoint;
-using WorkShop.Clients;
 using WorkShop.Model;
-using WorkShop.Providers;
+using WorkShop.Repositories;
 using WorkShop.Services;
 
 namespace WorkShop
@@ -40,19 +38,11 @@ namespace WorkShop
 
             services.AddHttpContextAccessor();
 
-            // services.AddHttpClient("strapi", options => {
-
-            //     options.BaseAddress = new Uri(Configuration["Strapi:Client:Url"]);
-            // });
-
-            // services.AddScoped<TokenProvider>();
-
-            // services.AddScoped<LoginClient>();
-            // services.AddScoped<ProviderClient>();
-            // services.AddScoped<ProductClient>();
-            // services.AddScoped<OperationTypeClient>();
-            // services.AddScoped<DiscountTypeClient>();
-            // services.AddScoped<ProviderInvoiceClient>();
+            services.AddScoped<InvoiceRepository>();
+            services.AddScoped<ProductRepository>();
+            services.AddScoped<ProviderRepository>();
+            services.AddScoped<OperationTypeRepository>();
+            services.AddScoped<DiscountTypeRepository>();
 
             services.AddScoped<ProductService>();
             services.AddScoped<OperationTypeService>();
