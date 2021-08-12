@@ -6,6 +6,7 @@ using LanguageExt;
 using Microsoft.Extensions.Logging;
 using WorkShop.Domain;
 using WorkShop.Model;
+using WorkShop.Repositories;
 
 namespace WorkShop.Services
 {
@@ -13,13 +14,13 @@ namespace WorkShop.Services
     {
         private readonly ILogger _logger;
 
-        private readonly WorkShopContext _dbContext;
+        private readonly DiscountTypeRepository _discountTypeRepository;
 
         public DiscountTypeService(ILogger<DiscountTypeService> logger, 
-                                   WorkShopContext workShopContext)
+                                   DiscountTypeRepository discountTypeRepository)
         {
             _logger = logger;
-            _dbContext = workShopContext;
+            _discountTypeRepository = discountTypeRepository;
         }        
 
         public Either<string, IEnumerable<DiscountTypeView>> GetDiscountTypes(int topRows, string name, int active)
@@ -28,9 +29,7 @@ namespace WorkShop.Services
             {
                 _logger.LogInformation($"get top {topRows} discount types");
 
-                return _dbContext.DiscountTypes.Where(discountType => discountType.Active.Equals(active) && 
-                    discountType.Name.Contains(name))
-                    .Take(topRows)
+                return _discountTypeRepository.FindDiscountTypes(topRows, name, active)
                     .Select(ToView)
                     .ToList();            
             }
@@ -45,10 +44,9 @@ namespace WorkShop.Services
         {
             try
             {
-                var existingDiscountType = _dbContext.DiscountTypes.FirstOrDefault(discountType => 
-                    discountType.Name.Equals(discountTypeView.Name, StringComparison.CurrentCultureIgnoreCase));
+                var discountTypeHolder = _discountTypeRepository.FindByName(discountTypeView.Name);
 
-                if (existingDiscountType != null)
+                if (discountTypeHolder.IsSome)
                 {
                     return $"Discount Type: {discountTypeView.Name} already exists";
                 }
@@ -62,10 +60,9 @@ namespace WorkShop.Services
                     Active = 1
                 };
 
-                _dbContext.DiscountTypes.Add(discountType);
-                _dbContext.SaveChanges();
+                var storedEntity = _discountTypeRepository.Add(discountType);
 
-                return discountTypeView;
+                return ToView(storedEntity);
             }
             catch (Exception ex)
             {
@@ -78,22 +75,22 @@ namespace WorkShop.Services
         {
             try
             {
-                var discountType = _dbContext.DiscountTypes.Find(Guid.Parse(view.Id));
+                var discountTypeHolder = _discountTypeRepository.FindById(view.Id);
 
-                if (discountType == null)
+                if (discountTypeHolder.IsNone)
                 {
                     return $"Discount Type not found {view.Name}";
                 }
 
+                var discountType = discountTypeHolder.FirstOrDefault();
                 discountType.Name = view.Name;
                 discountType.Description = view.Description;
                 discountType.Active = view.Active;
                 discountType.Updated = DateTime.Now;
 
-                _dbContext.DiscountTypes.Update(discountType);
-                _dbContext.SaveChanges();
+                var storedEntity = _discountTypeRepository.Update(discountType);
 
-                return view;
+                return ToView(storedEntity);
             }
             catch (Exception ex)
             {
@@ -106,7 +103,7 @@ namespace WorkShop.Services
         {
             try
             {
-                return _dbContext.DiscountTypes.Where(discountType => discountType.Id.Equals(Guid.Parse(id)))
+                return _discountTypeRepository.FindById(id)
                     .Map(ToView)
                     .FirstOrDefault();
 

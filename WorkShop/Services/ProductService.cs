@@ -5,6 +5,7 @@ using LanguageExt;
 using Microsoft.Extensions.Logging;
 using WorkShop.Domain;
 using WorkShop.Model;
+using WorkShop.Repositories;
 
 namespace WorkShop.Services
 {
@@ -12,13 +13,13 @@ namespace WorkShop.Services
     {
         private readonly ILogger _logger;
 
-        private readonly WorkShopContext _dbContext;
+        private readonly ProductRepository _productRepository;
 
         public ProductService(ILogger<ProductService> logger, 
-                              WorkShopContext workShopContext)
+                              ProductRepository productRepository)
         {
             _logger = logger;
-            _dbContext = workShopContext;
+            _productRepository = productRepository;
         }
 
         public Either<string, IEnumerable<ProductView>> GetProducts(int top = 25, string code = "", string name = "", int active = 1)
@@ -27,12 +28,9 @@ namespace WorkShop.Services
             {
                 _logger.LogInformation("get top {0} products with active value {1}", top, active);
 
-                return _dbContext.Products.Where(product => product.Active.Equals(active) && product.Code.Contains(code)
-                    && product.Name.Contains(name))
-                    .Take(top)
+                return _productRepository.FindProducts(top, code, name, active)
                     .Select(ToView)
                     .ToList();
-
             }
             catch (Exception ex)
             {
@@ -45,11 +43,10 @@ namespace WorkShop.Services
         {
             try
             {
-                var existingProduct = _dbContext.Products.FirstOrDefault(product => 
-                    product.Code.Equals(productView.Code, StringComparison.CurrentCultureIgnoreCase));
+                var holder = _productRepository.FindByCode(productView.Code);
 
-                if (existingProduct != null) {
-
+                if (holder.IsSome)
+                {
                     return $"Code {productView.Code} already exists";
                 }
 
@@ -64,10 +61,9 @@ namespace WorkShop.Services
                     Active = 1
                 };
 
-                _dbContext.Products.Add(product);
-                _dbContext.SaveChanges();
+                var storedProduct = _productRepository.Add(product);
 
-                return productView;
+                return ToView(storedProduct);
             }
             catch (Exception ex)
             {
@@ -80,12 +76,14 @@ namespace WorkShop.Services
         {
             try
             {  
-                var product = _dbContext.Products.Find(Guid.Parse(productView.Id));
+                var productHolder = _productRepository.FindById(productView.Id);
 
-                if (product == null)
+                if (productHolder.IsNone)
                 {
                     return $"Product with id: {productView.Id} not found";
                 }
+
+                var product = productHolder.FirstOrDefault();
 
                 product.Code = productView.Code;
                 product.Name = productView.Name;
@@ -94,10 +92,9 @@ namespace WorkShop.Services
                 product.Active = productView.Active;
                 product.Updated = DateTime.Now;
 
-                _dbContext.Products.Update(product);
-                _dbContext.SaveChanges();
+                var storedProduct = _productRepository.Update(product);
 
-                return productView;
+                return ToView(storedProduct);
             }
             catch (Exception ex)
             {
@@ -110,7 +107,7 @@ namespace WorkShop.Services
         {
             try
             {
-                return _dbContext.Products.Where(product => product.Id.Equals(Guid.Parse(id)))
+                return _productRepository.FindById(id)
                     .Map(ToView)
                     .FirstOrDefault();
             }
@@ -125,7 +122,7 @@ namespace WorkShop.Services
         {
             try
             {
-                return _dbContext.Products.Where(product => product.Active.Equals(1))
+                return _productRepository.GetActiveProducts()
                     .Select(ToView)
                     .ToList();
             }

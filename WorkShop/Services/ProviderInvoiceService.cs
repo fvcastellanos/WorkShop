@@ -5,6 +5,7 @@ using LanguageExt;
 using Microsoft.Extensions.Logging;
 using WorkShop.Domain;
 using WorkShop.Model;
+using WorkShop.Repositories;
 
 namespace WorkShop.Services
 {
@@ -12,13 +13,21 @@ namespace WorkShop.Services
     {
         private readonly ILogger _logger;
 
-        private readonly WorkShopContext _dbContext;
+        private readonly InvoiceRepository _invoiceRepository;
+
+        private readonly ProductRepository _productRepository;
+
+        private readonly ProviderRepository _providerRepository;
 
         public ProviderInvoiceService(ILogger<ProviderInvoiceService> logger,
-                                      WorkShopContext workShopContext)
+                                      InvoiceRepository invoiceRepository,
+                                      ProductRepository productRepository,
+                                      ProviderRepository providerRepository)
         {
             _logger = logger;
-            _dbContext = workShopContext;
+            _invoiceRepository = invoiceRepository;
+            _productRepository = productRepository;
+            _providerRepository = providerRepository;
         }
 
         public Either<string, IEnumerable<InvoiceView>> GetInvoices(InvoiceSearchView searchView)
@@ -27,14 +36,10 @@ namespace WorkShop.Services
             {
                 _logger.LogInformation($"Get top: {searchView.TopRows} invoices");
 
-                return _dbContext.Invoices.Where(invoice => invoice.Active.Equals(searchView.Active) 
-                        && invoice.Provider.Code.Contains(searchView.ProviderCode)
-                        && invoice.Provider.Name.Contains(searchView.ProviderName)
-                        && invoice.Serial.Contains(searchView.Serial) 
-                        && invoice.Number.Contains(searchView.Number))
-                    .Take(searchView.TopRows)
+                return _invoiceRepository.FindInvoices(searchView.TopRows, searchView.Serial, searchView.Number, 
+                    searchView.ProviderCode, searchView.ProviderName, searchView.Active)
                     .Select(ToView)
-                    .ToList();
+                    .ToList();                    
             }
             catch (Exception ex)
             {
@@ -47,9 +52,8 @@ namespace WorkShop.Services
         {
             try
             {
-                return _dbContext.Invoices.Where(invoice => invoice.Id.Equals(Guid.Parse(invoiceId)))
-                    .Map(ToView)
-                    .FirstOrDefault();
+                return _invoiceRepository.FindById(invoiceId)
+                    .Map(ToView);
             }
             catch (Exception ex)
             {
@@ -67,13 +71,13 @@ namespace WorkShop.Services
                     return $"Invoice: {view.Number} already exists for Provider: {view.ProviderView.Name}";
                 }
 
-                var provider = _dbContext.Providers.Find(Guid.Parse(view.ProviderView.Id));
+                var provider = _providerRepository.FindById(view.ProviderView.Id)
+                    .FirstOrDefault();
 
                 var invoice = new Invoice
                 {
                     Serial = view.Serial,
                     Number = view.Number,
-                    // Amount = view.Amount,
                     Description = view.Description,
                     Created = view.Created,
                     Active  = 1,
@@ -83,10 +87,9 @@ namespace WorkShop.Services
                     Tenant = DefaultTenant
                 };
 
-                _dbContext.Invoices.Add(invoice);
-                _dbContext.SaveChanges();
+                var storedInvoice = _invoiceRepository.Add(invoice);
 
-                return view;
+                return ToView(storedInvoice);
             }
             catch (Exception ex)
             {
@@ -112,7 +115,7 @@ namespace WorkShop.Services
         {
             try
             {
-                return _dbContext.InvoiceDetails.Where(detail => detail.Invoice.Id.Equals(Guid.Parse(invoiceId)))
+                return _invoiceRepository.GetDetails(invoiceId)
                     .Select(ToDetailView)
                     .ToList();
             }
@@ -127,8 +130,11 @@ namespace WorkShop.Services
         {
             try
             {
-                var invoice = _dbContext.Invoices.Find(Guid.Parse(invoiceDetailView.InvoiceId));
-                var product = _dbContext.Products.Find(Guid.Parse(invoiceDetailView.ProductView.Id));
+                var invoice = _invoiceRepository.FindById(invoiceDetailView.InvoiceId)
+                    .FirstOrDefault();
+
+                var product = _productRepository.FindById(invoiceDetailView.ProductView.Id)
+                    .FirstOrDefault();
 
                 var detail = new InvoiceDetail
                 {
@@ -141,12 +147,12 @@ namespace WorkShop.Services
                     Created = DateTime.Now
                 };
 
-                _dbContext.InvoiceDetails.Add(detail);
-                _dbContext.SaveChanges();
+                var storedDetail = _invoiceRepository.AddDetail(detail);
 
                 UpdateInvoiceAmount(invoiceDetailView.InvoiceId);
+                // AddInventoryMovement()
 
-                return invoiceDetailView;
+                return ToDetailView(storedDetail);
             }
             catch (Exception ex)
             {
@@ -159,8 +165,11 @@ namespace WorkShop.Services
         {
             try
             {
-                var detail = _dbContext.InvoiceDetails.Find(Guid.Parse(view.Id));
-                var product = _dbContext.Products.Find(Guid.Parse(view.ProductView.Id));
+                var detail = _invoiceRepository.FindDetailById(view.Id)
+                    .FirstOrDefault();
+                    
+                var product = _productRepository.FindById(view.ProductView.Id)
+                    .FirstOrDefault();
 
                 detail.Quantity = view.Quantity;
                 detail.Price = view.Price;
@@ -168,10 +177,10 @@ namespace WorkShop.Services
                 detail.Total = (view.Price * view.Quantity) - view.DiscountAmount;
                 detail.Product = product;
 
-                _dbContext.InvoiceDetails.Update(detail);
-                _dbContext.SaveChanges();
+                _invoiceRepository.UpdateDetail(detail);
 
                 UpdateInvoiceAmount(view.InvoiceId);
+                // UpdateInventoryMovement()
 
                 return view;
             }
@@ -186,14 +195,15 @@ namespace WorkShop.Services
         {
             try
             {
-                var detail = _dbContext.InvoiceDetails.Find(Guid.Parse(id));
+                var detailHolder = _invoiceRepository.FindDetailById(id);
 
-                if (detail != null)
+                if (detailHolder.IsSome)
                 {
-                    _dbContext.InvoiceDetails.Remove(detail);
-                    _dbContext.SaveChanges();
+                    var detail = detailHolder.FirstOrDefault();
 
+                    _invoiceRepository.DeleteDetail(detail);
                     UpdateInvoiceAmount(detail.Invoice.Id.ToString());
+                    // UpdateInvoentory()
 
                     return 1;
                 }
@@ -211,9 +221,8 @@ namespace WorkShop.Services
         {
             try
             {
-                return _dbContext.InvoiceDetails.Where(detail => detail.Id.Equals(Guid.Parse(detailId)))
-                    .Map(ToDetailView)
-                    .FirstOrDefault();
+                return _invoiceRepository.FindDetailById(detailId)
+                    .Map(ToDetailView);
             }
             catch (Exception ex)
             {
@@ -267,25 +276,33 @@ namespace WorkShop.Services
 
         private bool InvoiceExists(InvoiceView invoiceView)
         {
-            var invoice = _dbContext.Invoices.Where(invoice => 
-                    invoice.Provider.Id.Equals(Guid.Parse(invoiceView.ProviderView.Id)) 
-                    && invoice.Serial.Equals(invoiceView.Serial) 
-                    && invoice.Number.Equals(invoiceView.Number))
-                .FirstOrDefault();
+            var holder = _invoiceRepository.FindByInvoiceNumber(invoiceView.ProviderView.Id, invoiceView.Serial, invoiceView.Number);
 
-            return invoice != null;
+            return holder.IsSome;
         }
 
         private void UpdateInvoiceAmount(string invoiceId)
         {
-            var invoice = _dbContext.Invoices.Find(Guid.Parse(invoiceId));
+            var invoiceHolder = _invoiceRepository.FindById(invoiceId);
 
-            invoice.Total = _dbContext.InvoiceDetails
-                .Where(detail => detail.Invoice.Id.Equals(Guid.Parse(invoiceId)))
-                .Sum(detail => (detail.Quantity * detail.Price) - detail.DiscountAmount);
+            if (invoiceHolder.IsSome)
+            {
+                var invoice = invoiceHolder.FirstOrDefault();
 
-            _dbContext.Invoices.Update(invoice);
-            _dbContext.SaveChanges();
+                invoice.Total = _invoiceRepository.GetDetails(invoiceId)
+                    .Sum(detail => (detail.Quantity * detail.Price) - detail.DiscountAmount);
+
+                _invoiceRepository.Update(invoice);
+            }
+
+            // var invoice = _dbContext.Invoices.Find(Guid.Parse(invoiceId));
+
+            // invoice.Total = _dbContext.InvoiceDetails
+            //     .Where(detail => detail.Invoice.Id.Equals(Guid.Parse(invoiceId)))
+            //     .Sum(detail => (detail.Quantity * detail.Price) - detail.DiscountAmount);
+
+            // _dbContext.Invoices.Update(invoice);
+            // _dbContext.SaveChanges();
         }
     }
 }

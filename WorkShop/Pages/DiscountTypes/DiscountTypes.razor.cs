@@ -53,6 +53,7 @@ namespace WorkShop.Pages
         {
             DiscountTypeView = new DiscountTypeView();
             EditContext = new EditContext(DiscountTypeView);
+            ModifyModal = false;
             HideModalError();
             ShowModal();
         }
