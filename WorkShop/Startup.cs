@@ -49,6 +49,7 @@ namespace WorkShop
             services.AddScoped<ProviderService>();
             services.AddScoped<DiscountTypeService>();
             services.AddScoped<ProviderInvoiceService>();
+            services.AddScoped<ClientService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
