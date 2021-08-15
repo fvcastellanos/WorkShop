@@ -9,8 +9,8 @@ using WorkShop.Model;
 namespace WorkShop.Migrations
 {
     [DbContext(typeof(WorkShopContext))]
-    [Migration("20210805011909_WorkShopSchema")]
-    partial class WorkShopSchema
+    [Migration("20210815001821_WorkShopModel")]
+    partial class WorkShopModel
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -19,6 +19,75 @@ namespace WorkShop.Migrations
                 .HasDefaultSchema("workshop")
                 .HasAnnotation("ProductVersion", "3.1.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("WorkShop.Model.Customer", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id")
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("active")
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnName("code")
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("created")
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Description")
+                        .HasColumnName("description")
+                        .HasColumnType("varchar(300)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnName("name")
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<string>("TaxId")
+                        .HasColumnName("tax_id")
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Tenant")
+                        .IsRequired()
+                        .HasColumnName("tenant")
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("Updated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("updated")
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Active")
+                        .HasName("idx_customer_active");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasName("uq_customer_code");
+
+                    b.HasIndex("Created")
+                        .HasName("idx_customer_created");
+
+                    b.HasIndex("TaxId")
+                        .HasName("idx_customer_tax_id");
+
+                    b.HasIndex("Updated")
+                        .HasName("idx_customer_updated");
+
+                    b.ToTable("customer");
+                });
 
             modelBuilder.Entity("WorkShop.Model.DiscountType", b =>
                 {
@@ -166,9 +235,15 @@ namespace WorkShop.Migrations
                         .HasColumnType("timestamp")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                    b.Property<string>("Description")
+                        .HasColumnName("description")
+                        .HasColumnType("varchar(300)");
+
                     b.Property<DateTime>("DueDate")
+                        .ValueGeneratedOnAdd()
                         .HasColumnName("due_date")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnName("image_url")
@@ -193,6 +268,12 @@ namespace WorkShop.Migrations
                         .IsRequired()
                         .HasColumnName("tenant")
                         .HasColumnType("varchar(50)");
+
+                    b.Property<double>("Total")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("total")
+                        .HasColumnType("double")
+                        .HasDefaultValue(0.0);
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -249,6 +330,12 @@ namespace WorkShop.Migrations
                         .HasColumnType("timestamp")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                    b.Property<double>("DiscountAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("discount_amount")
+                        .HasColumnType("double")
+                        .HasDefaultValue(0.0);
+
                     b.Property<double>("Price")
                         .HasColumnName("price")
                         .HasColumnType("double");
@@ -264,12 +351,17 @@ namespace WorkShop.Migrations
                     b.Property<string>("invoice_id")
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("product_id")
+                        .HasColumnType("varchar(50)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Created")
                         .HasName("idx_invoice_detail_created");
 
                     b.HasIndex("invoice_id");
+
+                    b.HasIndex("product_id");
 
                     b.ToTable("invoice_detail");
                 });
@@ -538,6 +630,10 @@ namespace WorkShop.Migrations
                     b.HasOne("WorkShop.Model.Invoice", "Invoice")
                         .WithMany()
                         .HasForeignKey("invoice_id");
+
+                    b.HasOne("WorkShop.Model.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("product_id");
                 });
 #pragma warning restore 612, 618
         }

@@ -12,6 +12,7 @@ namespace WorkShop.Model
         public virtual DbSet<Invoice> Invoices { get; set; }
         public virtual DbSet<InvoiceDetail> InvoiceDetails { get; set; }
         public virtual DbSet<Inventory> Inventories { get; set; }
+        public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<UserToken> UserTokens { get; set; }
 
         public WorkShopContext(DbContextOptions options) : base(options)
@@ -232,6 +233,40 @@ namespace WorkShop.Model
             modelBuilder.Entity<Inventory>()
                 .HasIndex(p => p.Tenant)
                 .HasName("idx_inventory_tenant");
+
+            // Customer
+             modelBuilder.Entity<Customer>()
+                .Property(p => p.Created)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            modelBuilder.Entity<Customer>()
+                .Property(p => p.Updated)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+           
+            modelBuilder.Entity<Customer>()
+                .HasIndex(p => p.Created)
+                .HasName("idx_customer_created");
+
+            modelBuilder.Entity<Customer>()
+                .HasIndex(p => p.Updated)
+                .HasName("idx_customer_updated");
+
+            modelBuilder.Entity<Customer>()
+                .HasIndex(p => p.Code)
+                .HasName("uq_customer_code")
+                .IsUnique(true);
+
+            modelBuilder.Entity<Customer>()
+                .HasIndex(p => p.TaxId)
+                .HasName("idx_customer_tax_id");
+
+            modelBuilder.Entity<Customer>()
+                .HasIndex(p => p.Active)
+                .HasName("idx_customer_active");
+
+            modelBuilder.Entity<Customer>()
+                .Property(p => p.Active)
+                .HasDefaultValue(1);
 
             // UserToken
             modelBuilder.Entity<UserToken>()

@@ -3,12 +3,32 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WorkShop.Migrations
 {
-    public partial class WorkShopSchema : Migration
+    public partial class WorkShopModel : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
                 name: "workshop");
+
+            migrationBuilder.CreateTable(
+                name: "customer",
+                schema: "workshop",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "varchar(50)", nullable: false),
+                    code = table.Column<string>(type: "varchar(50)", nullable: false),
+                    name = table.Column<string>(type: "varchar(150)", nullable: false),
+                    tax_id = table.Column<string>(type: "varchar(50)", nullable: true),
+                    description = table.Column<string>(type: "varchar(300)", nullable: true),
+                    active = table.Column<int>(nullable: false, defaultValue: 1),
+                    tenant = table.Column<string>(type: "varchar(50)", nullable: false),
+                    created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_customer", x => x.id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "discount_type",
@@ -115,7 +135,9 @@ namespace WorkShop.Migrations
                     kind = table.Column<string>(type: "varchar(50)", nullable: false),
                     type = table.Column<string>(type: "varchar(50)", nullable: false),
                     image_url = table.Column<string>(type: "varchar(250)", nullable: true),
-                    due_date = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    due_date = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    description = table.Column<string>(type: "varchar(300)", nullable: true),
+                    total = table.Column<double>(nullable: false, defaultValue: 0.0),
                     active = table.Column<int>(nullable: false),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
@@ -191,8 +213,10 @@ namespace WorkShop.Migrations
                 {
                     id = table.Column<string>(type: "varchar(50)", nullable: false),
                     invoice_id = table.Column<string>(nullable: true),
+                    product_id = table.Column<string>(nullable: true),
                     quantity = table.Column<double>(nullable: false),
                     price = table.Column<double>(nullable: false),
+                    discount_amount = table.Column<double>(nullable: false, defaultValue: 0.0),
                     total = table.Column<double>(nullable: false),
                     created = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
@@ -206,7 +230,45 @@ namespace WorkShop.Migrations
                         principalTable: "invoice",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_invoice_detail_product_product_id",
+                        column: x => x.product_id,
+                        principalSchema: "workshop",
+                        principalTable: "product",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "idx_customer_active",
+                schema: "workshop",
+                table: "customer",
+                column: "active");
+
+            migrationBuilder.CreateIndex(
+                name: "uq_customer_code",
+                schema: "workshop",
+                table: "customer",
+                column: "code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "idx_customer_created",
+                schema: "workshop",
+                table: "customer",
+                column: "created");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_customer_tax_id",
+                schema: "workshop",
+                table: "customer",
+                column: "tax_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_customer_updated",
+                schema: "workshop",
+                table: "customer",
+                column: "updated");
 
             migrationBuilder.CreateIndex(
                 name: "idx_discount_type_created",
@@ -329,6 +391,12 @@ namespace WorkShop.Migrations
                 column: "invoice_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_invoice_detail_product_id",
+                schema: "workshop",
+                table: "invoice_detail",
+                column: "product_id");
+
+            migrationBuilder.CreateIndex(
                 name: "idx_operation_type_created",
                 schema: "workshop",
                 table: "operation_type",
@@ -419,6 +487,10 @@ namespace WorkShop.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "customer",
+                schema: "workshop");
+
+            migrationBuilder.DropTable(
                 name: "inventory",
                 schema: "workshop");
 
@@ -439,11 +511,11 @@ namespace WorkShop.Migrations
                 schema: "workshop");
 
             migrationBuilder.DropTable(
-                name: "product",
+                name: "invoice",
                 schema: "workshop");
 
             migrationBuilder.DropTable(
-                name: "invoice",
+                name: "product",
                 schema: "workshop");
 
             migrationBuilder.DropTable(

@@ -1,6 +1,6 @@
 namespace WorkShop.Domain
 {
-    public class ClientSearchView: SearchView
+    public class CustomerSearchView: SearchView
     {
         public string TaxId { get; set; }
     }

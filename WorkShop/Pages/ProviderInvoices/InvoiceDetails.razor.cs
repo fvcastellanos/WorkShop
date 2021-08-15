@@ -15,7 +15,6 @@ namespace WorkShop.Pages
         public string InvoiceId { get; set; }
 
         protected string DeleteDetailId;
-        protected bool DisplayDeleteModal;
 
         [Inject]
         protected ProviderInvoiceService ProviderInvoiceService { get; set; }

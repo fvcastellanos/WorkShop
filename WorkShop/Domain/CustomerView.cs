@@ -1,6 +1,6 @@
 namespace WorkShop.Domain
 {
-    public class ClientView
+    public class CustomerView
     {
         public string Id { get; set; }
         public string Code { get; set; }
